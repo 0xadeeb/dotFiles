@@ -1,0 +1,3 @@
+imap fj 
+syntax on
+

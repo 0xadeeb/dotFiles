@@ -1,0 +1,118 @@
+#+TITLE: Doom Emacs Config
+#+PROPERTY: header-args :tangle config.el
+
+
+* Table of contents :toc:
+- [[#instructions][Instructions]]
+- [[#default-configs][Default configs]]
+- [[#fonts-and-themes][Fonts and Themes]]
+- [[#org-mode-config][Org mode config]]
+- [[#remap-keys][Remap Keys]]
+- [[#auto-complete][Auto Complete]]
+- [[#browsers][Browsers]]
+
+* Instructions
+1. Place your private configuration here! Remember, you do not need to run 'doom sync' after modifying this file!
+
+2. Here are some additional functions/macros that could help you configure Doom:
+
+   + `load!' for loading external *.el files relative to this one
+   + `use-package!' for configuring packages
+   + `after!' for running code after a package has loaded
+   + `add-load-path!' for adding directories to the `load-path', relative to this file. Emacs searches the `load-path' when you load packages with `require' or `use-package'.
+   + `map!' for binding new keys
+
+3. To get information about any of these functions/macros, move the cursor over the highlighted symbol at press 'K' (non-evil users must press 'C-c c k'). This will open documentation for it, including demos of how they are used.
+
+4. You can also try 'gd' (or 'C-c c d') to jump to their definition and see how they are implemented.
+
+* Default configs
+
+#+begin_src elisp
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+(setq user-full-name "Adeeb HS"
+      user-mail-address "adeeb.hs1@gmail.com")
+
+(setq display-line-numbers-type 'relative)
+#+end_src
+
+* Fonts and Themes
+
++ Doom exposes five (optional) variables for controlling fonts in Doom. Here are the three important ones:
+  - `doom-font'
+  - `doom-variable-pitch-font'
+  - `doom-big-font' -- used for `doom-big-font-mode'; use this for presentations or streaming.
+
++ They all accept either a font-spec, font string ("Input Mono-12"), or xlfd font string. You generally only need these two:
+
++ There are two ways to load a theme. Both assume the theme is installed and available. You can either set `doom-theme' or manually load a theme with the `load-theme' function. This is the default:
+
+#+begin_src elisp
+ (setq doom-font (font-spec :family "monospace" :size 25 :weight 'semi-light)
+       doom-variable-pitch-font (font-spec :family "sans" :size 23))
+
+(setq doom-theme 'doom-dracula)
+
+(use-package fira-code-mode
+  :custom (fira-code-mode-disabled-ligatures '("[]" "x")) ;; List of ligatures to turn off
+  :hook prog-mode) ;; Enables fira-code-mode automatically for programming major modes
+
+#+end_src
+* Org mode config
+#+begin_src elisp
+(setq org-directory "~/org/")
+(setq org-hide-emphasis-markers t)
+(after! org
+  (setq org-startup-folded t))
+#+end_src
+* Remap Keys
+
+1. Esc to fj
+#+begin_src elisp
+(setq key-chord-two-keys-delay 0.15)
+(key-chord-define evil-insert-state-map "fj" 'evil-normal-state)
+(key-chord-mode 1)
+#+end_src
+
+* Auto Complete
+
+1. Company tab nine autocomple
+#+begin_src elisp
+;; (after! company
+;;   (setq +lsp-company-backends '(company-tabnine :separate company-capf company-yasnippet))
+;;   (setq company-show-numbers t)
+;;   (setq company-idle-delay 0)
+;; )
+;; (require 'company-tabnine)
+;; (add-to-list 'company-backends #'company-tabnine)
+;; (setq company-idle-delay 0)  ;; Trigger completion immediately.
+;; (setq company-show-numbers t) ;; Number the candidates (use M-1, M-2 etc to select completions).
+#+end_src
+
+* Browsers
+1. Set eww browser
+
+#+begin_src elisp
+(setq
+ ;; browse-url-browser-function 'eww-browse-url                    ; Use eww as the default browser
+ shr-use-fonts  nil                                             ; No special fonts
+ shr-use-colors nil                                             ; No colours
+ shr-indentation 2                                              ; Left-side margin
+ shr-width 70                                                   ; Fold text to 70 columns
+ shr-image-animate nil                                          ; Amination switched off
+ )
+(defun my/eww-toggle-images ()
+  "Toggle whether images are loaded and reload the current page from cache."
+  (interactive)
+  (setq-local shr-inhibit-images (not shr-inhibit-images))
+  (eww-reload t)
+  (message "Images are now %s"
+           (if shr-inhibit-images "off" "on")))
+
+;;(define-key eww-mode-map (kbd "I") #'my/eww-toggle-images)
+;;(define-key eww-link-keymap (kbd "I") #'my/eww-toggle-images)
+
+;; minimal rendering by default
+(setq-default shr-inhibit-images t)   ; toggle with `I`
+(setq-default shr-use-fonts nil)      ; toggle with `F`
+#+end_src
