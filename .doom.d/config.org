@@ -1,21 +1,32 @@
-#+TITLE: Doom Emacs Config
+#+TITLE:Doom Emacs Config
 #+PROPERTY: header-args :tangle config.el
-
 
 * Table of contents :toc:
 - [[#instructions][Instructions]]
 - [[#default-configs][Default configs]]
-- [[#fonts-and-themes][Fonts and Themes]]
+- [[#visual][Visual]]
+  - [[#general-information][General Information]]
+  - [[#theme][Theme]]
+  - [[#font][Font]]
+  - [[#icons][Icons]]
 - [[#org-mode-config][Org mode config]]
 - [[#remap-keys][Remap Keys]]
+  - [[#esc-to-fj][Esc to fj]]
+  - [[#resizing-windows][Resizing windows]]
 - [[#auto-complete][Auto Complete]]
+  - [[#company-tab-nine-autocomple][Company tab nine autocomple]]
 - [[#browsers][Browsers]]
+  - [[#eww-browser][Eww browser]]
+- [[#shells][Shells]]
+  - [[#v-term][V-term]]
+- [[#dashboard][Dashboard]]
+- [[#recent-files][Recent files]]
+  - [[#hide-auto-save-from-recentf][Hide auto save from recentf]]
 
 * Instructions
 1. Place your private configuration here! Remember, you do not need to run 'doom sync' after modifying this file!
 
 2. Here are some additional functions/macros that could help you configure Doom:
-
    + `load!' for loading external *.el files relative to this one
    + `use-package!' for configuring packages
    + `after!' for running code after a package has loaded
@@ -27,17 +38,16 @@
 4. You can also try 'gd' (or 'C-c c d') to jump to their definition and see how they are implemented.
 
 * Default configs
-
 #+begin_src elisp
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 (setq user-full-name "Adeeb HS"
-      user-mail-address "adeeb.hs1@gmail.com")
-
-(setq display-line-numbers-type 'relative)
+      user-mail-address "adeeb.hs1@gmail.com"
+      display-line-numbers-type 'relative
+      confirm-kill-emacs nil
+)
 #+end_src
-
-* Fonts and Themes
-
+* Visual
+** General Information
 + Doom exposes five (optional) variables for controlling fonts in Doom. Here are the three important ones:
   - `doom-font'
   - `doom-variable-pitch-font'
@@ -47,16 +57,27 @@
 
 + There are two ways to load a theme. Both assume the theme is installed and available. You can either set `doom-theme' or manually load a theme with the `load-theme' function. This is the default:
 
+** Theme
 #+begin_src elisp
- (setq doom-font (font-spec :family "monospace" :size 25 :weight 'semi-light)
-       doom-variable-pitch-font (font-spec :family "sans" :size 23))
-
 (setq doom-theme 'doom-dracula)
+#+end_src
+** Font
+#+begin_src elisp
+(setq doom-font (font-spec :family "monospace" :size 25 :weight 'semi-light)
+       doom-variable-pitch-font (font-spec :family "sans" :size 23))
 
 (use-package fira-code-mode
   :custom (fira-code-mode-disabled-ligatures '("[]" "x")) ;; List of ligatures to turn off
   :hook prog-mode) ;; Enables fira-code-mode automatically for programming major modes
-
+#+end_src
+** Icons
+#+begin_src elisp
+(use-package all-the-icons
+  :if (display-graphic-p))
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode)
+  )             ;; Icons for dired
+(setq doom-themes-treemacs-theme "doom-colors")
 #+end_src
 * Org mode config
 #+begin_src elisp
@@ -66,17 +87,37 @@
   (setq org-startup-folded t))
 #+end_src
 * Remap Keys
-
-1. Esc to fj
+** Esc to fj
 #+begin_src elisp
 (setq key-chord-two-keys-delay 0.15)
 (key-chord-define evil-insert-state-map "fj" 'evil-normal-state)
 (key-chord-mode 1)
 #+end_src
 
-* Auto Complete
+** Resizing windows
+Use `SPC w c`
+| Description            | Key Binding |
+|------------------------+-------------|
+| Increase Window Width  | =           |
+| Decrease Window Width  | -           |
+| Increase Window Height | +           |
+| Decrease Window Height | _           |
 
-1. Company tab nine autocomple
+#+begin_src elisp
+(defhydra hydra-window-size (:timeout 5)
+"Resize window"
+("=" evil-window-increase-width "increaseW")
+("-" evil-window-decrease-width "decreaseW")
+("+" evil-window-increase-height "increaseH")
+("_" evil-window-decrease-height "decreaseH")
+("f" nil "finished" :exit t))
+
+(map! :leader
+    (:prefix ("w". "window")
+    :desc "Resize current window" "c" #'hydra-window-size/body))
+#+end_src
+* Auto Complete
+** Company tab nine autocomple
 #+begin_src elisp
 ;; (after! company
 ;;   (setq +lsp-company-backends '(company-tabnine :separate company-capf company-yasnippet))
@@ -90,8 +131,7 @@
 #+end_src
 
 * Browsers
-1. Set eww browser
-
+** Eww browser
 #+begin_src elisp
 (setq
  ;; browse-url-browser-function 'eww-browse-url                    ; Use eww as the default browser
@@ -115,4 +155,33 @@
 ;; minimal rendering by default
 (setq-default shr-inhibit-images t)   ; toggle with `I`
 (setq-default shr-use-fonts nil)      ; toggle with `F`
+#+end_src
+
+* Shells
+** V-term
+#+begin_src elisp
+#+end_src
+* Dashboard
+#+begin_src elisp
+(use-package dashboard
+  :ensure t
+  :init      ;; tweak dashboard config before loading it
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-banner-logo-title "Let's go evil!")
+  (setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
+  ;;(setq dashboard-startup-banner "~/.doom.d/doom-emacs-dash.png")  ;; use custom image as banner
+  (setq dashboard-center-content nil) ;; set to 't' for centered content
+  (setq dashboard-items '((recents . 5)
+                          (projects . 5)))
+  :config
+  (dashboard-setup-startup-hook)
+  (dashboard-modify-heading-icons '((bookmarks . "book"))))
+
+#+end_src
+
+* Recent files
+** Hide auto save from recentf
+#+begin_src elisp
+(add-to-list 'recentf-exclude "/.emacs.d/.local/etc/workspaces/autosave")
 #+end_src

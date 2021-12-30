@@ -49,7 +49,11 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
 
-(package! fira-code-mode)
-(package! key-chord)
+(package! all-the-icons)
+(package! all-the-icons-dired)
 (package! company)
 (package! company-tabnine)
+(package! dashboard)
+(package! fira-code-mode)
+(package! key-chord)
+(package! treemacs-all-the-icons)
