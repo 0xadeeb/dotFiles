@@ -23,8 +23,8 @@ bind '"fj":vi-movement-mode'
 #Set paths
 
 #Add user's private bin to PATH
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
+if [ -d "$HOME/.local/bin" ] ; then
+    PATH="$HOME/.local/bin:$PATH"
 fi
 
 # Add Doom emacs to PATH 

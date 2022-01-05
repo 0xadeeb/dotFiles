@@ -1,4 +1,6 @@
 #+TITLE:Doom Emacs Config
+#+AUTHOR: Adeeb HS
+#+STARTUP: showeverything
 #+PROPERTY: header-args :tangle config.el
 
 * Table of contents :toc:
@@ -10,15 +12,17 @@
   - [[#font][Font]]
   - [[#icons][Icons]]
 - [[#org-mode-config][Org mode config]]
+  - [[#default-configs-1][Default configs]]
+  - [[#remap-org][Remap org]]
 - [[#remap-keys][Remap Keys]]
   - [[#esc-to-fj][Esc to fj]]
   - [[#resizing-windows][Resizing windows]]
-- [[#auto-complete][Auto Complete]]
-  - [[#company-tab-nine-autocomple][Company tab nine autocomple]]
+  - [[#switch-m-x-and-eval-expression-key-maps][Switch M-x and eval Expression key maps]]
+- [[#devepolment][Devepolment]]
+  - [[#languages][Languages]]
+- [[#company-mode][Company mode]]
 - [[#browsers][Browsers]]
   - [[#eww-browser][Eww browser]]
-- [[#shells][Shells]]
-  - [[#v-term][V-term]]
 - [[#dashboard][Dashboard]]
 - [[#recent-files][Recent files]]
   - [[#hide-auto-save-from-recentf][Hide auto save from recentf]]
@@ -27,11 +31,11 @@
 1. Place your private configuration here! Remember, you do not need to run 'doom sync' after modifying this file!
 
 2. Here are some additional functions/macros that could help you configure Doom:
-   + `load!' for loading external *.el files relative to this one
-   + `use-package!' for configuring packages
-   + `after!' for running code after a package has loaded
-   + `add-load-path!' for adding directories to the `load-path', relative to this file. Emacs searches the `load-path' when you load packages with `require' or `use-package'.
-   + `map!' for binding new keys
+   + ~load!~ for loading external *.el files relative to this one
+   + ~use-package!~ for configuring packages
+   + ~after!~ for running code after a package has loaded
+   + ~add-load-path!~ for adding directories to the `load-path', relative to this file. Emacs searches the `load-path' when you load packages with `require' or `use-package'.
+   + ~map!~ for binding new keys
 
 3. To get information about any of these functions/macros, move the cursor over the highlighted symbol at press 'K' (non-evil users must press 'C-c c k'). This will open documentation for it, including demos of how they are used.
 
@@ -46,30 +50,33 @@
       confirm-kill-emacs nil
 )
 #+end_src
+
 * Visual
 ** General Information
 + Doom exposes five (optional) variables for controlling fonts in Doom. Here are the three important ones:
-  - `doom-font'
-  - `doom-variable-pitch-font'
-  - `doom-big-font' -- used for `doom-big-font-mode'; use this for presentations or streaming.
+  - ~doom-font~
+  - ~doom-variable-pitch-font~
+  - ~doom-big-font~ -- used for ~doom-big-font-mode~; use this for presentations or streaming.
 
 + They all accept either a font-spec, font string ("Input Mono-12"), or xlfd font string. You generally only need these two:
 
-+ There are two ways to load a theme. Both assume the theme is installed and available. You can either set `doom-theme' or manually load a theme with the `load-theme' function. This is the default:
++ There are two ways to load a theme. Both assume the theme is installed and available. You can either set ~doom-theme~ or manually load a theme with the ~load-theme~ function. This is the default:
 
 ** Theme
 #+begin_src elisp
 (setq doom-theme 'doom-dracula)
 #+end_src
+
 ** Font
 #+begin_src elisp
 (setq doom-font (font-spec :family "monospace" :size 25 :weight 'semi-light)
        doom-variable-pitch-font (font-spec :family "sans" :size 23))
 
 (use-package fira-code-mode
-  :custom (fira-code-mode-disabled-ligatures '("[]" "x")) ;; List of ligatures to turn off
-  :hook prog-mode) ;; Enables fira-code-mode automatically for programming major modes
+  :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x")) ;; List of ligatures to turn off
+  :hook prog-mode org-mode) ;; Enables fira-code-mode automatically for programming  and org major modes
 #+end_src
+
 ** Icons
 #+begin_src elisp
 (use-package all-the-icons
@@ -78,14 +85,42 @@
   :hook (dired-mode . all-the-icons-dired-mode)
   )             ;; Icons for dired
 (setq doom-themes-treemacs-theme "doom-colors")
+;; Shorten some text
+(dolist (cell '(("#+name:" . "✎")
+                ("#+NAME:" . "✎")
+                ("#+begin_src" . "➤")
+                ("#+begin_example" . "➤")
+                ("#+end_src" . "⏹")
+                ("#+end_example" . "⏹")
+                ("#+RESULTS:" . "🠋")))
+  (add-to-list 'prettify-symbols-alist cell))
 #+end_src
+
+#+RESULTS:
+
 * Org mode config
+** Default configs
 #+begin_src elisp
 (setq org-directory "~/org/")
-(setq org-hide-emphasis-markers t)
 (after! org
-  (setq org-startup-folded t))
+  (setq org-startup-folded t
+        org-pretty-entities t
+        ))
+(map! :leader
+      :desc "Org babel tangle" "m B" #'org-babel-tangle)
+(after! org
+  (setq
+        org-ellipsis " ▼ "
+        org-superstar-headline-bullets-list '("◉" "●" "○" "◆" "●" "○" "◆")
+        org-superstar-item-bullet-alist '((?+ . ?➤) (?- . ?✦)) ; changes +/- symbols in item lists
+        org-log-done 'time
+        org-hide-emphasis-markers t
+        )
+  )
 #+end_src
+
+** Remap org
+
 * Remap Keys
 ** Esc to fj
 #+begin_src elisp
@@ -95,7 +130,8 @@
 #+end_src
 
 ** Resizing windows
-Use `SPC w c`
+Use ~SPC w c~ and then the following keys
+
 | Description            | Key Binding |
 |------------------------+-------------|
 | Increase Window Width  | =           |
@@ -116,18 +152,82 @@ Use `SPC w c`
     (:prefix ("w". "window")
     :desc "Resize current window" "c" #'hydra-window-size/body))
 #+end_src
-* Auto Complete
-** Company tab nine autocomple
+
+** Switch M-x and eval Expression key maps
+
 #+begin_src elisp
-;; (after! company
-;;   (setq +lsp-company-backends '(company-tabnine :separate company-capf company-yasnippet))
-;;   (setq company-show-numbers t)
-;;   (setq company-idle-delay 0)
-;; )
-;; (require 'company-tabnine)
-;; (add-to-list 'company-backends #'company-tabnine)
-;; (setq company-idle-delay 0)  ;; Trigger completion immediately.
-;; (setq company-show-numbers t) ;; Number the candidates (use M-1, M-2 etc to select completions).
+(map! :leader
+      :desc "M-x" ";" #'execute-extended-command)
+
+(map! :leader
+      :desc "Eval Expression" ":" #'eval-expression)
+#+end_src
+
+* Devepolment
+
+** Languages
+*** Language Server
+
+**** Lsp Mode
+#+begin_src elisp
+
+(defun efs/lsp-mode-setup ()
+  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+  (lsp-headerline-breadcrumb-mode))
+
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :hook (lsp-mode . efs/lsp-mode-setup)
+  :init
+  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+  :config
+  (lsp-enable-which-key-integration t))
+#+end_src
+
+**** Lsp Ui
+#+begin_src elisp
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode)
+  :custom
+  (lsp-ui-doc-position 'bottom))
+
+#+end_src
+
+**** Lsp Treemacs
+#+begin_src elisp
+(use-package lsp-treemacs
+  :after lsp)
+#+end_src
+
+*** Python
+#+begin_src elisp
+(use-package lsp-pyright
+  :ensure t
+  :init
+  (setq lsp-pyright-multi-root nil)
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp))))  ; or lsp-deferred
+#+end_src
+
+* Company mode
+#+begin_src elisp
+
+(use-package company
+  :after lsp-mode
+  :hook (lsp-mode . company-mode)
+  :bind (:map company-active-map
+         ("<tab>" . company-complete-selection))
+        (:map lsp-mode-map
+         ("<tab>" . company-indent-or-complete-common))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+
+
 #+end_src
 
 * Browsers
@@ -140,6 +240,7 @@ Use `SPC w c`
  shr-indentation 2                                              ; Left-side margin
  shr-width 70                                                   ; Fold text to 70 columns
  shr-image-animate nil                                          ; Amination switched off
+ shr-inhibit-images t                                           ; Images are switched off
  )
 (defun my/eww-toggle-images ()
   "Toggle whether images are loaded and reload the current page from cache."
@@ -149,32 +250,54 @@ Use `SPC w c`
   (message "Images are now %s"
            (if shr-inhibit-images "off" "on")))
 
-;;(define-key eww-mode-map (kbd "I") #'my/eww-toggle-images)
-;;(define-key eww-link-keymap (kbd "I") #'my/eww-toggle-images)
+(defun my/eww-display+ (buf _alist)
+  (let ((w (or (window-in-direction 'right)
+               (window-in-direction 'left)
+               (window-in-direction 'below)
+               (window-in-direction 'above)
+               (split-window-horizontally))))
+    (set-window-buffer w buf)
+    w))
 
-;; minimal rendering by default
-(setq-default shr-inhibit-images t)   ; toggle with `I`
-(setq-default shr-use-fonts nil)      ; toggle with `F`
+(push `(,(rx "*eww*")
+        (my/eww-display+))
+      display-buffer-alist)
+
 #+end_src
 
-* Shells
-** V-term
-#+begin_src elisp
-#+end_src
 * Dashboard
+Basic set up for dashboard
 #+begin_src elisp
 (use-package dashboard
-  :ensure t
   :init      ;; tweak dashboard config before loading it
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
-  (setq dashboard-banner-logo-title "Let's go evil!")
+  (setq dashboard-banner-logo-title nil)
   (setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
   ;;(setq dashboard-startup-banner "~/.doom.d/doom-emacs-dash.png")  ;; use custom image as banner
   (setq dashboard-center-content nil) ;; set to 't' for centered content
   (setq dashboard-items '((recents . 5)
                           (projects . 5)))
-  :config
+
+  :custom
+        (dashboard-set-init-info t)
+        (dashboard-set-navigator t)
+        (dashboard-projects-backend 'projectile)
+        (dashboard-navigator-buttons
+        `(((,(all-the-icons-fileicon "brain" :height 1.1 :v-adjust 0.0)
+                "Brain" "Knowledge base"
+                (lambda (&rest _) (browse-url "http://localhost:8080"))))
+            ;; ((,(all-the-icons-material "public" :height 1.1 :v-adjust 0.0)
+            ;;     "Homepage" "Personal website"
+            ;;     (lambda (&rest _) (browse-url "https://chrishayward.xyz"))))
+            ;; ((,(all-the-icons-faicon "university" :height 1.1 :v-adjust 0.0)
+            ;;     "Athabasca" "Univeristy login"
+            ;;     (lambda (&rest _) (browse-url "https://login.athabascau.ca/cas/login"))))
+            ;; ((,(all-the-icons-faicon "book" :height 1.1 :v-adjust 0.0)
+            ;;     "Bookshelf" "Vitalsource bookshelf"
+            ;;     (lambda (&rest _) (browse-url "https://online.vitalsource.com"))))
+            ))
+:config
   (dashboard-setup-startup-hook)
   (dashboard-modify-heading-icons '((bookmarks . "book"))))
 
