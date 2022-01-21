@@ -46,3 +46,4 @@ fi
 
 #Evaluate starship
 eval "$(starship init bash)"
+[ -f "/home/adeeb/.ghcup/env" ] && source "/home/adeeb/.ghcup/env" # ghcup-env

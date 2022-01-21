@@ -20,15 +20,17 @@
   :hook (dired-mode . all-the-icons-dired-mode)
   )             ;; Icons for dired
 (setq doom-themes-treemacs-theme "doom-colors")
-;; Shorten some text
-(dolist (cell '(("#+name:" . "✎")
-                ("#+NAME:" . "✎")
-                ("#+begin_src" . "➤")
-                ("#+begin_example" . "➤")
-                ("#+end_src" . "⏹")
-                ("#+end_example" . "⏹")
-                ("#+RESULTS:" . "🠋")))
-  (add-to-list 'prettify-symbols-alist cell))
+(setq +ligatures-extras-in-modes '(haskell-mode org-mode))
+
+(use-package highlight-indent-guides
+  :ensure t
+  :commands highlight-indent-guides-mode
+  :hook (prog-mode . highlight-indent-guides-mode)
+  :config
+  (setq highlight-indent-guides-method 'character
+        ;;highlight-indent-guides-character ?\❯
+   )
+ )
 
 (setq org-directory "~/org/")
 (after! org
@@ -41,11 +43,35 @@
   (setq
         org-ellipsis " ▼ "
         org-superstar-headline-bullets-list '("◉" "●" "○" "◆" "●" "○" "◆")
-        org-superstar-item-bullet-alist '((?+ . ?➤) (?- . ?✦)) ; changes +/- symbols in item lists
+        ;;org-superstar-item-bullet-alist '((?+ . ?➤) (?- . ?✦)) ; changes +/- symbols in item lists
         org-log-done 'time
         org-hide-emphasis-markers t
         )
   )
+
+;; Shorten some text
+;; (defun my/org-mode/load-prettify-symbols ()
+;;   (interactive)
+;;   (setq prettify-symbols-alist
+;;     '(("#+begin_src" . ?)
+;;       ("#+BEGIN_SRC" . ?)
+;;       ("#+end_src" . ?)
+;;       ("#+END_SRC" . ?)
+;;       ("#+begin_example" . ?)
+;;       ("#+BEGIN_EXAMPLE" . ?)
+;;       ("#+end_example" . ?)
+;;       ("#+END_EXAMPLE" . ?)
+;;       ("#+header:" . ?)
+;;       ("#+HEADER:" . ?)
+;;       ("#+results:" . ?)
+;;       ("#+RESULTS:" . ?)
+;;       ("#+call:" . ?)
+;;       ("#+CALL:" . ?)
+;;       (":PROPERTIES:" . ?)
+;;       (":properties:" . ?)
+;;       ))
+;;   (prettify-symbols-mode 1))
+;; (add-hook 'org-mode-hook 'my/org-mode/load-prettify-symbols)
 
 (setq key-chord-two-keys-delay 0.15)
 (key-chord-define evil-insert-state-map "fj" 'evil-normal-state)
@@ -74,28 +100,55 @@
   (lsp-headerline-breadcrumb-mode))
 
 (use-package lsp-mode
+  :after lsp
   :commands (lsp lsp-deferred)
   :hook (lsp-mode . efs/lsp-mode-setup)
-  :init
-  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
   :config
   (lsp-enable-which-key-integration t))
 
 (use-package lsp-ui
+  :after lsp
   :hook (lsp-mode . lsp-ui-mode)
   :custom
-  (lsp-ui-doc-position 'bottom))
+  (lsp-ui-doc-position 'bottom)
+  )
 
 (use-package lsp-treemacs
   :after lsp)
 
 (use-package lsp-pyright
+  :after lsp
   :ensure t
   :init
   (setq lsp-pyright-multi-root nil)
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
                           (lsp))))  ; or lsp-deferred
+
+(after! haskell-mode
+  (set-ligatures! 'haskell-mode
+    :lambda        "\\"
+    :composition   "."
+    :null          "()"
+    :int           "Int"
+    :float         "Double"
+    :str           "String"
+    :bool          "Bool"
+    :in            "`elem`"
+    :not-in        "`notElem`"
+    :union         "`union`"
+    :intersect     "`intersect`"
+    :or            "||"
+    :and           "&&"
+    :for           "forall"
+    :sum           "sum"
+    :product       "product"
+    )
+   )
+(plist-put! +ligatures-extra-symbols
+            :sum        "Σ"
+            :product    "Ⲡ"
+            )
 
 (use-package company
   :after lsp-mode
@@ -105,7 +158,7 @@
         (:map lsp-mode-map
          ("<tab>" . company-indent-or-complete-common))
   :custom
-  (company-minimum-prefix-length 1)
+  (company-minimum-prefix-length 2)
   (company-idle-delay 0.0))
 
 (use-package company-box
@@ -128,21 +181,8 @@
   (message "Images are now %s"
            (if shr-inhibit-images "off" "on")))
 
-(defun my/eww-display+ (buf _alist)
-  (let ((w (or (window-in-direction 'right)
-               (window-in-direction 'left)
-               (window-in-direction 'below)
-               (window-in-direction 'above)
-               (split-window-horizontally))))
-    (set-window-buffer w buf)
-    w))
-
-(push `(,(rx "*eww*")
-        (my/eww-display+))
-      display-buffer-alist)
-
 (use-package dashboard
-  :init      ;; tweak dashboard config before loading it
+  :init
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
   (setq dashboard-banner-logo-title nil)
@@ -156,22 +196,10 @@
         (dashboard-set-init-info t)
         (dashboard-set-navigator t)
         (dashboard-projects-backend 'projectile)
-        (dashboard-navigator-buttons
-        `(((,(all-the-icons-fileicon "brain" :height 1.1 :v-adjust 0.0)
-                "Brain" "Knowledge base"
-                (lambda (&rest _) (browse-url "http://localhost:8080"))))
-            ;; ((,(all-the-icons-material "public" :height 1.1 :v-adjust 0.0)
-            ;;     "Homepage" "Personal website"
-            ;;     (lambda (&rest _) (browse-url "https://chrishayward.xyz"))))
-            ;; ((,(all-the-icons-faicon "university" :height 1.1 :v-adjust 0.0)
-            ;;     "Athabasca" "Univeristy login"
-            ;;     (lambda (&rest _) (browse-url "https://login.athabascau.ca/cas/login"))))
-            ;; ((,(all-the-icons-faicon "book" :height 1.1 :v-adjust 0.0)
-            ;;     "Bookshelf" "Vitalsource bookshelf"
-            ;;     (lambda (&rest _) (browse-url "https://online.vitalsource.com"))))
-            ))
+
 :config
   (dashboard-setup-startup-hook)
   (dashboard-modify-heading-icons '((bookmarks . "book"))))
 
 (add-to-list 'recentf-exclude "/.emacs.d/.local/etc/workspaces/autosave")
+(add-to-list 'projectile-ignored-projects "~/.emacs.d")

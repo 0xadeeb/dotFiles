@@ -35,7 +35,9 @@
        hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
        hydra             ; define keybindings for custom stuff
        ;;indent-guides     ; highlighted indent columns
-       ligatures         ; ligatures and symbols to make your code pretty again
+       (ligatures
+        +extra
+        )                                ; ligatures and symbols to make your code pretty again
        ;;minimap           ; show a map of the code on the side
        modeline          ; snazzy, Atom-inspired modeline, plus API
        ;;nav-flash         ; blink cursor line after big motions
@@ -80,7 +82,7 @@
 
        :checkers
        syntax              ; tasing you for every semicolon you forget
-       ;;(spell +flyspell) ; tasing you for misspelling mispelling
+       (spell +flyspell) ; tasing you for misspelling mispelling
        ;;grammar           ; tasing grammar mistake every you make
 
        :tools
@@ -107,13 +109,15 @@
        ;;upload            ; map local to remote projects via ssh/ftp
 
        :os
-       (:if IS-MAC macos)  ; improve compatibility with macOS
+       ;;(:if IS-MAC macos)  ; improve compatibility with macOS
        ;;tty               ; improve the terminal Emacs experience
 
        :lang
        ;;agda              ; types of types of types of types...
        ;;beancount         ; mind the GAAP
-       cc               ; C > C++ == 1
+       (cc               ; C > C++ == 1
+        +lsp
+        +clangd)
        ;;clojure           ; java with a lisp
        ;;common-lisp       ; if you've seen one lisp, you've seen them all
        ;;coq               ; proofs-as-programs
@@ -134,7 +138,8 @@
        ;;fstar             ; (dependent) types and (monadic) effects and Z3
        ;;gdscript          ; the language you waited for
        ;;(go +lsp)         ; the hipster dialect
-       (haskell +lsp)    ; a language that's lazier than I am
+       (haskell
+        +lsp)    ; a language that's lazier than I am
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ; a language you can depend on
        json              ; At least it ain't XML
