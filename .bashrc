@@ -6,19 +6,57 @@
 [[ $- != *i* ]] && return
 PS1='[\u@\h \W]\$ '
 
+#Ignore duplicate commands in history
+export HISTCONTROL=ignoreboth:erasedups
+
 #All aliases
-alias ls='ls --color=auto'
-alias la='ls -a --color=auto'
-alias ll='ls -l --color=auto'
-alias lla='ls -al --color=auto'
-alias g='grep --color=auto'
-alias v='vim'
-alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME' 
+alias ls='exa'
+alias la='exa -a'
+alias ll='exa -l'
+alias lla='exa -al'
+alias lt='exa -aT --color=always --group-directories-first'
+alias grep='grep --color=auto'
+alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME' 		#for dotfiles
+#alias reboot='sudo reboot'
+alias shutdown='shutdown now'
+alias df='df -h'
+alias du='du -h'
+alias cp="cp -i"
+alias mv='mv -i'
+alias ln='ln -i'
+alias eb='earbuds'
+alias brc='vim ~/.bashrc'
+alias prg='g++ -o test'
+alias ps='procs'
+
+#Function for jumping up directories
+up () {
+  local d=""
+  local limit="$1"
+
+  # Default to limit of 1
+  if [ -z "$limit" ] || [ "$limit" -le 0 ]; then
+    limit=1
+  fi
+
+  for ((i=1;i<=limit;i++)); do
+    d="../$d"
+  done
+  d="$d$2"
+
+  # perform cd. Show error if cd fails
+  if ! cd "$d"; then
+    echo "Couldn't go up $limit dirs.";
+  fi
+}
+
 
 #Vim and emacs settings
 export EDITOR=/usr/bin/vim
 set -o vi
 bind '"fj":vi-movement-mode'
+bind -m vi-command 'Control-l: clear-screen'
+bind -m vi-insert 'Control-l: clear-screen'
 
 #Set paths
 
@@ -47,3 +85,4 @@ fi
 #Evaluate starship
 eval "$(starship init bash)"
 [ -f "/home/adeeb/.ghcup/env" ] && source "/home/adeeb/.ghcup/env" # ghcup-env
+eval "$(zoxide init bash)"

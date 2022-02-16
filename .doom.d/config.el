@@ -1,8 +1,8 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
-(setq user-full-name "Adeeb HS"
+(setq user-full-name "adeeb"
       user-mail-address "adeeb.hs1@gmail.com"
       display-line-numbers-type 'relative
-      confirm-kill-emacs nil
+      ;;confirm-kill-emacs nil
 )
 
 (setq doom-theme 'doom-dracula)
@@ -11,7 +11,8 @@
        doom-variable-pitch-font (font-spec :family "sans" :size 23))
 
 (use-package fira-code-mode
-  :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x")) ;; List of ligatures to turn off
+  :config (fira-code-mode-set-font)
+  :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x" "***" "<>")) ;; List of ligatures to turn off
   :hook prog-mode org-mode) ;; Enables fira-code-mode automatically for programming  and org major modes
 
 (use-package all-the-icons
@@ -21,6 +22,7 @@
   )             ;; Icons for dired
 (setq doom-themes-treemacs-theme "doom-colors")
 (setq +ligatures-extras-in-modes '(haskell-mode org-mode))
+(set-scroll-bar-mode 'right)
 
 (use-package highlight-indent-guides
   :ensure t
@@ -33,14 +35,12 @@
  )
 
 (setq org-directory "~/org/")
-(after! org
-  (setq org-startup-folded t
-        org-pretty-entities t
-        ))
 (map! :leader
       :desc "Org babel tangle" "m B" #'org-babel-tangle)
 (after! org
   (setq
+        org-pretty-entities t
+        org-startup-folded t
         org-ellipsis " ▼ "
         org-superstar-headline-bullets-list '("◉" "●" "○" "◆" "●" "○" "◆")
         ;;org-superstar-item-bullet-alist '((?+ . ?➤) (?- . ?✦)) ; changes +/- symbols in item lists
@@ -95,6 +95,22 @@
 (map! :leader
       :desc "Eval Expression" ":" #'eval-expression)
 
+(define-key evil-normal-state-map (kbd "0") #'evil-first-non-blank)
+(define-key evil-normal-state-map (kbd "^") #'evil-beginning-of-line)
+
+(global-set-key (kbd "<backtab>") 'un-indent-by-removing-4-spaces)
+(defun un-indent-by-removing-4-spaces ()
+  "remove 4 spaces from beginning of of line"
+  (interactive)
+  (save-excursion
+    (save-match-data
+      (beginning-of-line)
+      ;; get rid of tabs at beginning of line
+      (when (looking-at "^\\s-+")
+        (untabify (match-beginning 0) (match-end 0)))
+      (when (looking-at "^    ")
+        (replace-match "")))))
+
 (defun efs/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
   (lsp-headerline-breadcrumb-mode))
@@ -116,6 +132,8 @@
 (use-package lsp-treemacs
   :after lsp)
 
+;;(setq lsp-clients-clangd-args '("--header-insertion=never"))
+
 (use-package lsp-pyright
   :after lsp
   :ensure t
@@ -124,6 +142,11 @@
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
                           (lsp))))  ; or lsp-deferred
+
+(plist-put! +ligatures-extra-symbols
+            :sum        "Σ"
+            :product    "Ⲡ"
+            )
 
 (after! haskell-mode
   (set-ligatures! 'haskell-mode
@@ -145,20 +168,29 @@
     :product       "product"
     )
    )
-(plist-put! +ligatures-extra-symbols
-            :sum        "Σ"
-            :product    "Ⲡ"
-            )
+
+(use-package autoinsert
+  :config
+  (setq auto-insert-query nil)             ; disable the default auto-inserts
+  (auto-insert-mode 1)                     ; enable auto-insert-mode globally
+  (add-hook 'find-file-hook 'auto-insert)  ; insert templates when we create new files
+  (setq auto-insert-alist nil)             ; remove this line to restore defaults
+  ;; (add-to-list 'auto-insert-alist          ; add "competitive coding" templates to auto insert
+  ;;              '("^/home/adeeb/code/.+\\.cpp\\'" . "/home/adeeb/code/template.cpp"))
+  (add-to-list 'auto-insert-alist          ; the same with ~ expansion
+               (cons (concat "^" (expand-file-name "~/code/") ".+\\.cpp\\'")
+                     (expand-file-name "~/code/template.cpp")))
+ )
 
 (use-package company
   :after lsp-mode
   :hook (lsp-mode . company-mode)
-  :bind (:map company-active-map
-         ("<tab>" . company-complete-selection))
-        (:map lsp-mode-map
-         ("<tab>" . company-indent-or-complete-common))
+  ;; :bind (:map company-active-map
+  ;;        ("<tab>" . company-complete-selection))
+  ;;       (:map lsp-mode-map
+  ;;        ("<tab>" . company-indent-or-complete-common))
   :custom
-  (company-minimum-prefix-length 2)
+  (company-minimum-prefix-length 1)
   (company-idle-delay 0.0))
 
 (use-package company-box
@@ -201,5 +233,17 @@
   (dashboard-setup-startup-hook)
   (dashboard-modify-heading-icons '((bookmarks . "book"))))
 
-(add-to-list 'recentf-exclude "/.emacs.d/.local/etc/workspaces/autosave")
-(add-to-list 'projectile-ignored-projects "~/.emacs.d")
+(add-to-list 'recentf-exclude "/.emacs.d/.local/etc/workspaces/autosave") ;;hide recent files from recentf
+(add-to-list 'projectile-ignored-projects "~/.emacs.d")                 ;;hide emacs.d dir from projectile projects
+
+(use-package flyspell
+  :ensure nil
+  :diminish
+  :if (executable-find "aspell")
+  :hook (((text-mode outline-mode latex-mode org-mode markdown-mode) . flyspell-mode))
+  :custom
+  (flyspell-issue-message-flag nil)
+  (ispell-program-name "aspell")
+  (ispell-extra-args
+   '("--sug-mode=ultra" "--lang=en_US" "--camel-case"))
+  )
