@@ -1,5 +1,5 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
-(setq user-full-name "adeeb"
+(setq user-full-name "Adeeb HS"
       user-mail-address "adeeb.hs1@gmail.com"
       display-line-numbers-type 'relative
       ;;confirm-kill-emacs nil
@@ -13,7 +13,7 @@
 (use-package fira-code-mode
   :config (fira-code-mode-set-font)
   :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x" "***" "<>")) ;; List of ligatures to turn off
-  :hook prog-mode org-mode) ;; Enables fira-code-mode automatically for programming  and org major modes
+  :hook prog-mode org-mode) ;; Enables fira-code-mode automatically for programming and org major modes
 
 (use-package all-the-icons
   :if (display-graphic-p))
@@ -49,40 +49,16 @@
         )
   )
 
-;; Shorten some text
-;; (defun my/org-mode/load-prettify-symbols ()
-;;   (interactive)
-;;   (setq prettify-symbols-alist
-;;     '(("#+begin_src" . ?)
-;;       ("#+BEGIN_SRC" . ?)
-;;       ("#+end_src" . ?)
-;;       ("#+END_SRC" . ?)
-;;       ("#+begin_example" . ?)
-;;       ("#+BEGIN_EXAMPLE" . ?)
-;;       ("#+end_example" . ?)
-;;       ("#+END_EXAMPLE" . ?)
-;;       ("#+header:" . ?)
-;;       ("#+HEADER:" . ?)
-;;       ("#+results:" . ?)
-;;       ("#+RESULTS:" . ?)
-;;       ("#+call:" . ?)
-;;       ("#+CALL:" . ?)
-;;       (":PROPERTIES:" . ?)
-;;       (":properties:" . ?)
-;;       ))
-;;   (prettify-symbols-mode 1))
-;; (add-hook 'org-mode-hook 'my/org-mode/load-prettify-symbols)
-
 (setq key-chord-two-keys-delay 0.15)
 (key-chord-define evil-insert-state-map "fj" 'evil-normal-state)
 (key-chord-mode 1)
 
 (defhydra hydra-window-size (:timeout 5)
 "Resize window"
-("=" evil-window-increase-width "increaseW")
-("-" evil-window-decrease-width "decreaseW")
-("+" evil-window-increase-height "increaseH")
-("_" evil-window-decrease-height "decreaseH")
+("=" evil-window-increase-width "Increase Width")
+("-" evil-window-decrease-width "Decrease Width")
+("+" evil-window-increase-height "Increase Height")
+("_" evil-window-decrease-height "Decrease Height")
 ("f" nil "finished" :exit t))
 
 (map! :leader
@@ -110,6 +86,23 @@
         (untabify (match-beginning 0) (match-end 0)))
       (when (looking-at "^    ")
         (replace-match "")))))
+
+(use-package company
+  :after lsp-mode
+  :hook (lsp-mode . company-mode)
+  ;; :bind (:map company-active-map
+  ;;        ("<tab>" . company-complete-selection))
+  ;;       (:map lsp-mode-map
+  ;;        ("<tab>" . company-indent-or-complete-common))
+  :custom
+  ;; (+lsp-company-backends '(company-tabnine :separate company-capf company-yasnippet)) ;; to enable Tab-nine autocomplete
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+
+;;(add-to-list 'company-backends #'company-tabnine)
 
 (defun efs/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
@@ -142,6 +135,10 @@
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
                           (lsp))))  ; or lsp-deferred
+
+(use-package pyvenv
+  :config
+  (pyvenv-mode 1))
 
 (plist-put! +ligatures-extra-symbols
             :sum        "Σ"
@@ -182,20 +179,6 @@
                      (expand-file-name "~/code/template.cpp")))
  )
 
-(use-package company
-  :after lsp-mode
-  :hook (lsp-mode . company-mode)
-  ;; :bind (:map company-active-map
-  ;;        ("<tab>" . company-complete-selection))
-  ;;       (:map lsp-mode-map
-  ;;        ("<tab>" . company-indent-or-complete-common))
-  :custom
-  (company-minimum-prefix-length 1)
-  (company-idle-delay 0.0))
-
-(use-package company-box
-  :hook (company-mode . company-box-mode))
-
 (setq
  ;; browse-url-browser-function 'eww-browse-url                    ; Use eww as the default browser
  shr-use-fonts  nil                                             ; No special fonts
@@ -218,16 +201,14 @@
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
   (setq dashboard-banner-logo-title nil)
-  (setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-  ;;(setq dashboard-startup-banner "~/.doom.d/doom-emacs-dash.png")  ;; use custom image as banner
+  ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
+  (setq dashboard-startup-banner "~/.dotfiles/emacs/emacs-logo (1).png")  ;; use custom image as banner
+  (setq dashboard-set-init-info t)
   (setq dashboard-center-content nil) ;; set to 't' for centered content
   (setq dashboard-items '((recents . 5)
-                          (projects . 5)))
-
-  :custom
-        (dashboard-set-init-info t)
-        (dashboard-set-navigator t)
-        (dashboard-projects-backend 'projectile)
+                          (projects . 3)))
+  (setq dashboard-set-navigator t)
+  (setq dashboard-projects-backend 'projectile)
 
 :config
   (dashboard-setup-startup-hook)
@@ -238,7 +219,7 @@
 
 (use-package flyspell
   :ensure nil
-  :diminish
+  :defer t
   :if (executable-find "aspell")
   :hook (((text-mode outline-mode latex-mode org-mode markdown-mode) . flyspell-mode))
   :custom
@@ -247,3 +228,6 @@
   (ispell-extra-args
    '("--sug-mode=ultra" "--lang=en_US" "--camel-case"))
   )
+(remove-hook 'org-mode-hook #'flyspell-mode)
+
+(beacon-mode 1)

@@ -16,9 +16,9 @@ alias ll='exa -l'
 alias lla='exa -al'
 alias lt='exa -aT --color=always --group-directories-first'
 alias grep='grep --color=auto'
-alias dotf='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME' 		#for dotfiles
+#alias dotf='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME' 		#for dotfiles
 #alias reboot='sudo reboot'
-alias shutdown='shutdown now'
+#alias shutdown='shutdown now'
 alias df='df -h'
 alias du='du -h'
 alias cp="cp -i"
@@ -49,7 +49,6 @@ up () {
     echo "Couldn't go up $limit dirs.";
   fi
 }
-
 
 #Vim and emacs settings
 export EDITOR=/usr/bin/vim
@@ -82,7 +81,22 @@ elif [ -d "$HOME/.gem/ruby/2.0.0/bin" ]; then
     PATH="$PATH:$HOME/.gem/ruby/2.0.0/bin"
 fi
 
+# add Javascript LSP
+export DENO_INSTALL="/home/adeeb/.deno"
+export PATH="$DENO_INSTALL/bin:$PATH"
+
+
 #Evaluate starship
 eval "$(starship init bash)"
 [ -f "/home/adeeb/.ghcup/env" ] && source "/home/adeeb/.ghcup/env" # ghcup-env
 eval "$(zoxide init bash)"
+
+# Pretty-print man(1) pages.
+export LESS_TERMCAP_mb=$'\E[1;31m'
+export LESS_TERMCAP_md=$'\E[1;31m'
+export LESS_TERMCAP_me=$'\E[0m'
+export LESS_TERMCAP_ue=$'\E[0m'
+export LESS_TERMCAP_so=$'\E[1;33m'
+export LESS_TERMCAP_se=$'\E[0m'
+export LESS_TERMCAP_us=$'\E[1;32m'
+

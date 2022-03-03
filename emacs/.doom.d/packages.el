@@ -51,6 +51,7 @@
 
 (package! all-the-icons)
 (package! all-the-icons-dired)
+(package! beacon)
 (package! company)
 (package! company-box)
 (package! company-tabnine)

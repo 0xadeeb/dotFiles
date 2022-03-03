@@ -22,14 +22,16 @@
   - [[#switch-evil-beginning-of-line-and-first-non-white-space-character-keys][Switch evil beginning of line and first non white space character keys]]
   - [[#define-back-tab][Define back tab]]
 - [[#devepolment][Devepolment]]
+  - [[#company-mode][Company mode]]
   - [[#languages][Languages]]
   - [[#competitive-coding][Competitive coding]]
-- [[#company-mode][Company mode]]
 - [[#browsers][Browsers]]
   - [[#eww-browser][Eww browser]]
 - [[#dashboard][Dashboard]]
 - [[#hide-files-or-directories][Hide files or directories]]
 - [[#flyspell][FlySpell]]
+- [[#extra-hacks][Extra hacks]]
+  - [[#beacon][Beacon]]
 
 * Instructions
 1. Place your private configuration here! Remember, you do not need to run 'doom sync' after modifying this file!
@@ -48,7 +50,7 @@
 * Default configs
 #+begin_src elisp
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
-(setq user-full-name "adeeb"
+(setq user-full-name "Adeeb HS"
       user-mail-address "adeeb.hs1@gmail.com"
       display-line-numbers-type 'relative
       ;;confirm-kill-emacs nil
@@ -79,7 +81,7 @@
 (use-package fira-code-mode
   :config (fira-code-mode-set-font)
   :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x" "***" "<>")) ;; List of ligatures to turn off
-  :hook prog-mode org-mode) ;; Enables fira-code-mode automatically for programming  and org major modes
+  :hook prog-mode org-mode) ;; Enables fira-code-mode automatically for programming and org major modes
 #+end_src
 
 ** Icons
@@ -125,29 +127,6 @@
         )
   )
 
-;; Shorten some text
-;; (defun my/org-mode/load-prettify-symbols ()
-;;   (interactive)
-;;   (setq prettify-symbols-alist
-;;     '(("#+begin_src" . ?)
-;;       ("#+BEGIN_SRC" . ?)
-;;       ("#+end_src" . ?)
-;;       ("#+END_SRC" . ?)
-;;       ("#+begin_example" . ?)
-;;       ("#+BEGIN_EXAMPLE" . ?)
-;;       ("#+end_example" . ?)
-;;       ("#+END_EXAMPLE" . ?)
-;;       ("#+header:" . ?)
-;;       ("#+HEADER:" . ?)
-;;       ("#+results:" . ?)
-;;       ("#+RESULTS:" . ?)
-;;       ("#+call:" . ?)
-;;       ("#+CALL:" . ?)
-;;       (":PROPERTIES:" . ?)
-;;       (":properties:" . ?)
-;;       ))
-;;   (prettify-symbols-mode 1))
-;; (add-hook 'org-mode-hook 'my/org-mode/load-prettify-symbols)
 #+end_src
 
 ** Remap org
@@ -173,10 +152,10 @@ Use ~SPC w c~ and then the following keys
 #+begin_src elisp
 (defhydra hydra-window-size (:timeout 5)
 "Resize window"
-("=" evil-window-increase-width "increaseW")
-("-" evil-window-decrease-width "decreaseW")
-("+" evil-window-increase-height "increaseH")
-("_" evil-window-decrease-height "decreaseH")
+("=" evil-window-increase-width "Increase Width")
+("-" evil-window-decrease-width "Decrease Width")
+("+" evil-window-increase-height "Increase Height")
+("_" evil-window-decrease-height "Decrease Height")
 ("f" nil "finished" :exit t))
 
 (map! :leader
@@ -218,6 +197,27 @@ Use ~SPC w c~ and then the following keys
 #+end_src
 
 * Devepolment
+
+** Company mode
+#+begin_src elisp
+(use-package company
+  :after lsp-mode
+  :hook (lsp-mode . company-mode)
+  ;; :bind (:map company-active-map
+  ;;        ("<tab>" . company-complete-selection))
+  ;;       (:map lsp-mode-map
+  ;;        ("<tab>" . company-indent-or-complete-common))
+  :custom
+  ;; (+lsp-company-backends '(company-tabnine :separate company-capf company-yasnippet)) ;; to enable Tab-nine autocomplete
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+
+;;(add-to-list 'company-backends #'company-tabnine)
+#+end_src
+
 ** Languages
 *** Language Server
 **** Lsp Mode
@@ -270,6 +270,13 @@ Use ~SPC w c~ and then the following keys
                           (lsp))))  ; or lsp-deferred
 #+end_src
 
+**** Pyvenv package to set up virtual environments
+#+begin_src elisp
+(use-package pyvenv
+  :config
+  (pyvenv-mode 1))
+#+end_src
+
 *** Haskell
 **** Setting up extra ligatures just for haskell
 #+begin_src elisp
@@ -301,6 +308,7 @@ Use ~SPC w c~ and then the following keys
 
 #+end_src
 
+
 ** Competitive coding
 *** Add c++ template automatically while file creation
 #+begin_src emacs-lisp
@@ -316,24 +324,6 @@ Use ~SPC w c~ and then the following keys
                (cons (concat "^" (expand-file-name "~/code/") ".+\\.cpp\\'")
                      (expand-file-name "~/code/template.cpp")))
  )
-
-#+end_src
-
-* Company mode
-#+begin_src elisp
-(use-package company
-  :after lsp-mode
-  :hook (lsp-mode . company-mode)
-  ;; :bind (:map company-active-map
-  ;;        ("<tab>" . company-complete-selection))
-  ;;       (:map lsp-mode-map
-  ;;        ("<tab>" . company-indent-or-complete-common))
-  :custom
-  (company-minimum-prefix-length 1)
-  (company-idle-delay 0.0))
-
-(use-package company-box
-  :hook (company-mode . company-box-mode))
 
 #+end_src
 
@@ -366,16 +356,14 @@ Basic set up for dashboard
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
   (setq dashboard-banner-logo-title nil)
-  (setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-  ;;(setq dashboard-startup-banner "~/.doom.d/doom-emacs-dash.png")  ;; use custom image as banner
+  ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
+  (setq dashboard-startup-banner "~/.dotfiles/emacs/emacs-logo (1).png")  ;; use custom image as banner
+  (setq dashboard-set-init-info t)
   (setq dashboard-center-content nil) ;; set to 't' for centered content
   (setq dashboard-items '((recents . 5)
-                          (projects . 5)))
-
-  :custom
-        (dashboard-set-init-info t)
-        (dashboard-set-navigator t)
-        (dashboard-projects-backend 'projectile)
+                          (projects . 3)))
+  (setq dashboard-set-navigator t)
+  (setq dashboard-projects-backend 'projectile)
 
 :config
   (dashboard-setup-startup-hook)
@@ -394,7 +382,7 @@ Spell checker for text mode buffers
 #+begin_src elisp
 (use-package flyspell
   :ensure nil
-  :diminish
+  :defer t
   :if (executable-find "aspell")
   :hook (((text-mode outline-mode latex-mode org-mode markdown-mode) . flyspell-mode))
   :custom
@@ -403,5 +391,11 @@ Spell checker for text mode buffers
   (ispell-extra-args
    '("--sug-mode=ultra" "--lang=en_US" "--camel-case"))
   )
+(remove-hook 'org-mode-hook #'flyspell-mode)
+#+end_src
 
+* Extra hacks
+** Beacon
+#+begin_src emacs-lisp
+(beacon-mode 1)
 #+end_src
