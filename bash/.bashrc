@@ -53,7 +53,7 @@ up () {
 #Vim and emacs settings
 export EDITOR=/usr/bin/vim
 set -o vi
-bind '"fj":vi-movement-mode'
+bind '"jk":vi-movement-mode'
 bind -m vi-command 'Control-l: clear-screen'
 bind -m vi-insert 'Control-l: clear-screen'
 

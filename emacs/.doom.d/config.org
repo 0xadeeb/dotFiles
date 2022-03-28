@@ -14,7 +14,6 @@
   - [[#configure-indentation][Configure Indentation]]
 - [[#org-mode-config][Org mode config]]
   - [[#default-configs-1][Default configs]]
-  - [[#remap-org][Remap org]]
 - [[#remap-keys][Remap Keys]]
   - [[#esc-to-fj][Esc to fj]]
   - [[#resizing-windows][Resizing windows]]
@@ -25,6 +24,8 @@
   - [[#company-mode][Company mode]]
   - [[#languages][Languages]]
   - [[#competitive-coding][Competitive coding]]
+- [[#shells][Shells]]
+  - [[#v-term][V-term]]
 - [[#browsers][Browsers]]
   - [[#eww-browser][Eww browser]]
 - [[#dashboard][Dashboard]]
@@ -79,9 +80,11 @@
        doom-variable-pitch-font (font-spec :family "sans" :size 23))
 
 (use-package fira-code-mode
-  :config (fira-code-mode-set-font)
+  :config
+  (fira-code-mode-set-font)
   :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x" "***" "<>")) ;; List of ligatures to turn off
-  :hook prog-mode org-mode) ;; Enables fira-code-mode automatically for programming and org major modes
+  :hook prog-mode org-mode ;; Enables fira-code-mode automatically for programming and org major modes
+  )
 #+end_src
 
 ** Icons
@@ -129,12 +132,10 @@
 
 #+end_src
 
-** Remap org
-
 * Remap Keys
 ** Esc to fj
 #+begin_src elisp
-(setq key-chord-two-keys-delay 0.15)
+(setq key-chord-two-keys-delay 0.1)
 (key-chord-define evil-insert-state-map "fj" 'evil-normal-state)
 (key-chord-mode 1)
 #+end_src
@@ -203,10 +204,6 @@ Use ~SPC w c~ and then the following keys
 (use-package company
   :after lsp-mode
   :hook (lsp-mode . company-mode)
-  ;; :bind (:map company-active-map
-  ;;        ("<tab>" . company-complete-selection))
-  ;;       (:map lsp-mode-map
-  ;;        ("<tab>" . company-indent-or-complete-common))
   :custom
   ;; (+lsp-company-backends '(company-tabnine :separate company-capf company-yasnippet)) ;; to enable Tab-nine autocomplete
   (company-minimum-prefix-length 1)
@@ -214,24 +211,50 @@ Use ~SPC w c~ and then the following keys
 
 (use-package company-box
   :hook (company-mode . company-box-mode))
-
-;;(add-to-list 'company-backends #'company-tabnine)
 #+end_src
 
 ** Languages
 *** Language Server
 **** Lsp Mode
+Setting up lsp mode
 #+begin_src elisp
-(defun efs/lsp-mode-setup ()
-  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-  (lsp-headerline-breadcrumb-mode))
-
 (use-package lsp-mode
   :after lsp
   :commands (lsp lsp-deferred)
-  :hook (lsp-mode . efs/lsp-mode-setup)
   :config
-  (lsp-enable-which-key-integration t))
+  (lsp-enable-which-key-integration t)
+  )
+#+end_src
+
+Configuring lsp-mode after loading, refer [[https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/][Lsp mode features]]
+#+begin_src elisp
+(after! lsp-mode
+    (setq lsp-enable-symbol-highlighting nil)                   ;; 1
+    (setq lsp-ui-doc-enable nil)                                ;; 2
+    (setq lsp-ui-doc-show-with-cursor nil)
+    (setq lsp-ui-doc-show-with-mouse nil)
+    (setq lsp-lens-enable nil)                                  ;; 3
+    (setq lsp-headerline-breadcrumb-segments
+          '(path-up-to-project file symbols))
+    (setq lsp-headerline-breadcrumb-enable nil)                 ;; 4
+    (setq lsp-ui-sideline-enable t)                             ;; 5
+    (setq lsp-ui-sideline-show-code-actions t)
+    (setq lsp-ui-sideline-enable t)                             ;; 6
+    (setq lsp-ui-sideline-show-hover t)
+    (setq lsp-modeline-code-actions-enable t)                   ;; 7
+
+    (setq lsp-diagnostics-provider :auto)                       ;; 8
+    (setq lsp-ui-sideline-enable t)                             ;; 9
+    (setq lsp-eldoc-enable-hover t)                             ;; 10
+    (setq lsp-modeline-diagnostics-enable t)                    ;; 11
+
+    (setq lsp-signature-auto-activate t)                        ;; 12
+    (setq lsp-signature-render-documentation nil)               ;; 13
+
+    (setq lsp-completion-provider :capf)                        ;; 14
+    (setq lsp-completion-show-detail t)                         ;; 15
+    (setq lsp-completion-show-kind t)                           ;; 16
+  )
 #+end_src
 
 **** Lsp Ui
@@ -286,14 +309,14 @@ Use ~SPC w c~ and then the following keys
             )
 
 (after! haskell-mode
-  (set-ligatures! 'haskell-mode
+  (set-ligatures!  'haskell-mode
     :lambda        "\\"
     :composition   "."
     :null          "()"
     :int           "Int"
     :float         "Double"
-    :str           "String"
-    :bool          "Bool"
+    ;; :str           "String"
+    ;; :bool          "Bool"
     :in            "`elem`"
     :not-in        "`notElem`"
     :union         "`union`"
@@ -307,7 +330,6 @@ Use ~SPC w c~ and then the following keys
    )
 
 #+end_src
-
 
 ** Competitive coding
 *** Add c++ template automatically while file creation
@@ -325,6 +347,15 @@ Use ~SPC w c~ and then the following keys
                      (expand-file-name "~/code/template.cpp")))
  )
 
+#+end_src
+
+* Shells
+** V-term
+Open v-term in a new window
+#+begin_src elisp
+(after! vterm
+  (set-popup-rule! "*doom:vterm-popup:main" :size 0.35 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
+  )
 #+end_src
 
 * Browsers
@@ -346,6 +377,15 @@ Use ~SPC w c~ and then the following keys
   (eww-reload t)
   (message "Images are now %s"
            (if shr-inhibit-images "off" "on")))
+
+(map! :leader
+    (:prefix ("e". "eww-browser")
+    :desc "Open new eww buffer" "o" #'eww))
+
+(after! eww
+  (set-popup-rule! "*eww*" :size 0.4 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
+  )
+
 #+end_src
 
 * Dashboard
@@ -357,7 +397,7 @@ Basic set up for dashboard
   (setq dashboard-set-file-icons t)
   (setq dashboard-banner-logo-title nil)
   ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-  (setq dashboard-startup-banner "~/.dotfiles/emacs/emacs-logo (1).png")  ;; use custom image as banner
+  (setq dashboard-startup-banner "~/.dotfiles/emacs/logo1.png")  ;; use custom image as banner
   (setq dashboard-set-init-info t)
   (setq dashboard-center-content nil) ;; set to 't' for centered content
   (setq dashboard-items '((recents . 5)
@@ -374,7 +414,7 @@ Basic set up for dashboard
 * Hide files or directories
 #+begin_src elisp
 (add-to-list 'recentf-exclude "/.emacs.d/.local/etc/workspaces/autosave") ;;hide recent files from recentf
-(add-to-list 'projectile-ignored-projects "~/.emacs.d")                 ;;hide emacs.d dir from projectile projects
+(add-to-list 'projectile-ignored-projects "*.emacs.d")                 ;;hide emacs.d dir from projectile projects
 #+end_src
 
 * FlySpell

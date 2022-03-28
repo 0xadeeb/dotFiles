@@ -11,9 +11,11 @@
        doom-variable-pitch-font (font-spec :family "sans" :size 23))
 
 (use-package fira-code-mode
-  :config (fira-code-mode-set-font)
+  :config
+  (fira-code-mode-set-font)
   :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x" "***" "<>")) ;; List of ligatures to turn off
-  :hook prog-mode org-mode) ;; Enables fira-code-mode automatically for programming and org major modes
+  :hook prog-mode org-mode ;; Enables fira-code-mode automatically for programming and org major modes
+  )
 
 (use-package all-the-icons
   :if (display-graphic-p))
@@ -49,7 +51,7 @@
         )
   )
 
-(setq key-chord-two-keys-delay 0.15)
+(setq key-chord-two-keys-delay 0.1)
 (key-chord-define evil-insert-state-map "fj" 'evil-normal-state)
 (key-chord-mode 1)
 
@@ -90,10 +92,6 @@
 (use-package company
   :after lsp-mode
   :hook (lsp-mode . company-mode)
-  ;; :bind (:map company-active-map
-  ;;        ("<tab>" . company-complete-selection))
-  ;;       (:map lsp-mode-map
-  ;;        ("<tab>" . company-indent-or-complete-common))
   :custom
   ;; (+lsp-company-backends '(company-tabnine :separate company-capf company-yasnippet)) ;; to enable Tab-nine autocomplete
   (company-minimum-prefix-length 1)
@@ -102,18 +100,40 @@
 (use-package company-box
   :hook (company-mode . company-box-mode))
 
-;;(add-to-list 'company-backends #'company-tabnine)
-
-(defun efs/lsp-mode-setup ()
-  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-  (lsp-headerline-breadcrumb-mode))
-
 (use-package lsp-mode
   :after lsp
   :commands (lsp lsp-deferred)
-  :hook (lsp-mode . efs/lsp-mode-setup)
   :config
-  (lsp-enable-which-key-integration t))
+  (lsp-enable-which-key-integration t)
+  )
+
+(after! lsp-mode
+    (setq lsp-enable-symbol-highlighting nil)                   ;; 1
+    (setq lsp-ui-doc-enable nil)                                ;; 2
+    (setq lsp-ui-doc-show-with-cursor nil)
+    (setq lsp-ui-doc-show-with-mouse nil)
+    (setq lsp-lens-enable nil)                                  ;; 3
+    (setq lsp-headerline-breadcrumb-segments
+          '(path-up-to-project file symbols))
+    (setq lsp-headerline-breadcrumb-enable nil)                 ;; 4
+    (setq lsp-ui-sideline-enable t)                             ;; 5
+    (setq lsp-ui-sideline-show-code-actions t)
+    (setq lsp-ui-sideline-enable t)                             ;; 6
+    (setq lsp-ui-sideline-show-hover t)
+    (setq lsp-modeline-code-actions-enable t)                   ;; 7
+
+    (setq lsp-diagnostics-provider :auto)                       ;; 8
+    (setq lsp-ui-sideline-enable t)                             ;; 9
+    (setq lsp-eldoc-enable-hover t)                             ;; 10
+    (setq lsp-modeline-diagnostics-enable t)                    ;; 11
+
+    (setq lsp-signature-auto-activate t)                        ;; 12
+    (setq lsp-signature-render-documentation nil)               ;; 13
+
+    (setq lsp-completion-provider :capf)                        ;; 14
+    (setq lsp-completion-show-detail t)                         ;; 15
+    (setq lsp-completion-show-kind t)                           ;; 16
+  )
 
 (use-package lsp-ui
   :after lsp
@@ -146,14 +166,14 @@
             )
 
 (after! haskell-mode
-  (set-ligatures! 'haskell-mode
+  (set-ligatures!  'haskell-mode
     :lambda        "\\"
     :composition   "."
     :null          "()"
     :int           "Int"
     :float         "Double"
-    :str           "String"
-    :bool          "Bool"
+    ;; :str           "String"
+    ;; :bool          "Bool"
     :in            "`elem`"
     :not-in        "`notElem`"
     :union         "`union`"
@@ -179,6 +199,10 @@
                      (expand-file-name "~/code/template.cpp")))
  )
 
+(after! vterm
+  (set-popup-rule! "*doom:vterm-popup:main" :size 0.35 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
+  )
+
 (setq
  ;; browse-url-browser-function 'eww-browse-url                    ; Use eww as the default browser
  shr-use-fonts  nil                                             ; No special fonts
@@ -196,13 +220,21 @@
   (message "Images are now %s"
            (if shr-inhibit-images "off" "on")))
 
+(map! :leader
+    (:prefix ("e". "eww-browser")
+    :desc "Open new eww buffer" "o" #'eww))
+
+(after! eww
+  (set-popup-rule! "*eww*" :size 0.4 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
+  )
+
 (use-package dashboard
   :init
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
   (setq dashboard-banner-logo-title nil)
   ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-  (setq dashboard-startup-banner "~/.dotfiles/emacs/emacs-logo (1).png")  ;; use custom image as banner
+  (setq dashboard-startup-banner "~/.dotfiles/emacs/logo1.png")  ;; use custom image as banner
   (setq dashboard-set-init-info t)
   (setq dashboard-center-content nil) ;; set to 't' for centered content
   (setq dashboard-items '((recents . 5)
@@ -215,7 +247,7 @@
   (dashboard-modify-heading-icons '((bookmarks . "book"))))
 
 (add-to-list 'recentf-exclude "/.emacs.d/.local/etc/workspaces/autosave") ;;hide recent files from recentf
-(add-to-list 'projectile-ignored-projects "~/.emacs.d")                 ;;hide emacs.d dir from projectile projects
+(add-to-list 'projectile-ignored-projects "*.emacs.d")                 ;;hide emacs.d dir from projectile projects
 
 (use-package flyspell
   :ensure nil
