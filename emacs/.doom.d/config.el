@@ -7,6 +7,9 @@
 
 (setq doom-theme 'doom-dracula)
 
+(setq scroll-margin 3)
+(setq hscroll-margin 3)
+
 (setq doom-font (font-spec :family "monospace" :size 25 :weight 'semi-light)
        doom-variable-pitch-font (font-spec :family "sans" :size 23))
 
@@ -145,7 +148,7 @@
 (use-package lsp-treemacs
   :after lsp)
 
-;;(setq lsp-clients-clangd-args '("--header-insertion=never"))
+(setq lsp-clients-clangd-args '("--header-insertion=never"))
 
 (use-package lsp-pyright
   :after lsp
@@ -199,6 +202,7 @@
                      (expand-file-name "~/code/template.cpp")))
  )
 
+(setq vterm-shell "/bin/zsh")
 (after! vterm
   (set-popup-rule! "*doom:vterm-popup:main" :size 0.35 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
   )
@@ -234,11 +238,11 @@
   (setq dashboard-set-file-icons t)
   (setq dashboard-banner-logo-title nil)
   ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-  (setq dashboard-startup-banner "~/.dotfiles/emacs/logo1.png")  ;; use custom image as banner
+  (setq dashboard-startup-banner "~/.dotfiles/emacs/logo1c.png")  ;; use custom image as banner
   (setq dashboard-set-init-info t)
   (setq dashboard-center-content nil) ;; set to 't' for centered content
   (setq dashboard-items '((recents . 5)
-                          (projects . 3)))
+                          (projects . 5)))
   (setq dashboard-set-navigator t)
   (setq dashboard-projects-backend 'projectile)
 
