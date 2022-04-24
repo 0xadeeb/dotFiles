@@ -32,6 +32,8 @@
 - [[#dashboard][Dashboard]]
 - [[#hide-files-or-directories][Hide files or directories]]
 - [[#flyspell][FlySpell]]
+- [[#configuration-of-emacs-daemon][Configuration of emacs daemon]]
+  - [[#check-if-current-session-is-daemon-session][Check if current session is daemon session]]
 - [[#extra-hacks][Extra hacks]]
   - [[#beacon][Beacon]]
 
@@ -361,7 +363,7 @@ Open v-term in a new window
 #+begin_src elisp
 (setq vterm-shell "/bin/zsh")
 (after! vterm
-  (set-popup-rule! "*doom:vterm-popup:main" :size 0.35 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
+  (set-popup-rule! "\\*doom:vterm-popup:.*\\*" :size 0.35 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
   )
 #+end_src
 
@@ -411,6 +413,7 @@ Basic set up for dashboard
                           (projects . 5)))
   (setq dashboard-set-navigator t)
   (setq dashboard-projects-backend 'projectile)
+  (setq doom-fallback-buffer-name "*dashboard*")
 
 :config
   (dashboard-setup-startup-hook)
@@ -427,18 +430,26 @@ Basic set up for dashboard
 * FlySpell
 Spell checker for text mode buffers
 #+begin_src elisp
-(use-package flyspell
-  :ensure nil
-  :defer t
-  :if (executable-find "aspell")
-  :hook (((text-mode outline-mode latex-mode org-mode markdown-mode) . flyspell-mode))
-  :custom
-  (flyspell-issue-message-flag nil)
-  (ispell-program-name "aspell")
-  (ispell-extra-args
-   '("--sug-mode=ultra" "--lang=en_US" "--camel-case"))
-  )
+;; (use-package flyspell
+;;   :ensure nil
+;;   :defer t
+;;   :if (executable-find "aspell")
+;;   :hook (((text-mode outline-mode latex-mode org-mode markdown-mode) . flyspell-mode))
+;;   :custom
+;;   (flyspell-issue-message-flag nil)
+;;   (ispell-program-name "aspell")
+;;   (ispell-extra-args
+;;    '("--sug-mode=ultra" "--lang=en_US" "--camel-case"))
+;;   )
 (remove-hook 'org-mode-hook #'flyspell-mode)
+#+end_src
+
+* Configuration of emacs daemon
+** Check if current session is daemon session
+#+begin_src emacs-lisp
+if (daemonp)
+    (message "Loading emacs as a client!")
+    (message "Loading regular emacs")
 #+end_src
 
 * Extra hacks

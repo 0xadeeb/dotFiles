@@ -204,7 +204,7 @@
 
 (setq vterm-shell "/bin/zsh")
 (after! vterm
-  (set-popup-rule! "*doom:vterm-popup:main" :size 0.35 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
+  (set-popup-rule! "\\*doom:vterm-popup:.*\\*" :size 0.35 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
   )
 
 (setq
@@ -245,6 +245,7 @@
                           (projects . 5)))
   (setq dashboard-set-navigator t)
   (setq dashboard-projects-backend 'projectile)
+  (setq doom-fallback-buffer-name "*dashboard*")
 
 :config
   (dashboard-setup-startup-hook)
@@ -253,17 +254,17 @@
 (add-to-list 'recentf-exclude "/.emacs.d/.local/etc/workspaces/autosave") ;;hide recent files from recentf
 (add-to-list 'projectile-ignored-projects "*.emacs.d")                 ;;hide emacs.d dir from projectile projects
 
-(use-package flyspell
-  :ensure nil
-  :defer t
-  :if (executable-find "aspell")
-  :hook (((text-mode outline-mode latex-mode org-mode markdown-mode) . flyspell-mode))
-  :custom
-  (flyspell-issue-message-flag nil)
-  (ispell-program-name "aspell")
-  (ispell-extra-args
-   '("--sug-mode=ultra" "--lang=en_US" "--camel-case"))
-  )
+;; (use-package flyspell
+;;   :ensure nil
+;;   :defer t
+;;   :if (executable-find "aspell")
+;;   :hook (((text-mode outline-mode latex-mode org-mode markdown-mode) . flyspell-mode))
+;;   :custom
+;;   (flyspell-issue-message-flag nil)
+;;   (ispell-program-name "aspell")
+;;   (ispell-extra-args
+;;    '("--sug-mode=ultra" "--lang=en_US" "--camel-case"))
+;;   )
 (remove-hook 'org-mode-hook #'flyspell-mode)
 
 (beacon-mode 1)
