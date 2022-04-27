@@ -11,14 +11,26 @@
 (setq hscroll-margin 3)
 
 (setq doom-font (font-spec :family "monospace" :size 25 :weight 'semi-light)
-       doom-variable-pitch-font (font-spec :family "sans" :size 23))
+      doom-variable-pitch-font (font-spec :family "sans" :size 23))
+(after! doom-themes
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t))
+(custom-set-faces!
+  '(font-lock-comment-face :slant italic)
+  '(font-lock-keyword-face :slant italic))
+
+;; ℚ𝕎𝔼ℝ𝕋𝕐𝕌𝕀𝕆ℙ𝔸𝕊𝔻𝔽𝔾ℍ𝕁𝕂𝕃ℤ𝕏ℂ𝕍𝔹ℕ𝕄 -- Capital letters
+;; 𝕢𝕨𝕖𝕣𝕥𝕪𝕦𝕚𝕠𝕡𝕒𝕤𝕕𝕗𝕘𝕙𝕛𝕜𝕝𝕫𝕩𝕔𝕧𝕓𝕟𝕞 -- small letters
+;; 𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡𝟘 -- numbers
 
 (use-package fira-code-mode
   :config
   (fira-code-mode-set-font)
-  :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x" "***" "<>")) ;; List of ligatures to turn off
+  :custom (fira-code-mode-disabled-ligatures '("www" "[]" "#{" "#(" "#_" "#_(" "x" "***" "<>")) ;; List of ligatures to turn off
   :hook prog-mode org-mode ;; Enables fira-code-mode automatically for programming and org major modes
   )
+(set-language-environment "UTF-8")
+(set-default-coding-systems 'utf-8)
 
 (use-package all-the-icons
   :if (display-graphic-p))
@@ -266,5 +278,9 @@
 ;;    '("--sug-mode=ultra" "--lang=en_US" "--camel-case"))
 ;;   )
 (remove-hook 'org-mode-hook #'flyspell-mode)
+
+(if (daemonp)
+    (message "Loading emacs as a client!")
+    (message "Loading regular emacs"))
 
 (beacon-mode 1)

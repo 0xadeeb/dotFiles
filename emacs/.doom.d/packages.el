@@ -64,4 +64,5 @@
 (package! lsp-pyright)
 (package! lsp-treemacs)
 (package! lsp-ui)
+(package! rainbow-mode)
 (package! treemacs-all-the-icons)
