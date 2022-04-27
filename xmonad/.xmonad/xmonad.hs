@@ -16,17 +16,27 @@
 --
 
 import XMonad
+import Colors
 import Data.Monoid
 import System.Exit
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.EwmhDesktops
+import XMonad.Hooks.DynamicLog
+import XMonad.Hooks.InsertPosition
+import XMonad.Hooks.ManageHelpers
+import XMonad.Hooks.StatusBar
+import XMonad.Hooks.StatusBar.PP
 import XMonad.Util.SpawnOnce
 import XMonad.Util.Run
+import XMonad.Util.Loggers
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Layout.Spacing
+import XMonad.Layout.SimplestFloat
 import XMonad.Layout.LayoutModifier
+import XMonad.Layout.LimitWindows (limitWindows, increaseLimit, decreaseLimit)
+import XMonad.Layout.Renamed
 import XMonad.Layout.NoBorders
-import qualified XMonad.Layout.Fullscreen as F
+import qualified XMonad.Layout.Magnifier as Mag
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
@@ -42,6 +52,7 @@ myFocusFollowsMouse = True
 -- Width of the window border in pixels.
 --
 myBorderWidth   = 1
+myXmobar = "~/.xmonad/xmobar.hs"
 
 -- modMask lets you specify which modkey you want to use. The default
 -- is mod1Mask ("left alt").  You may also consider using mod3Mask
@@ -85,18 +96,19 @@ myModMask'       = mod3Mask
 --
 myWorkspaces    = ["1","2","3","4","5","6","7","8","9"]
 
--- Border colors for unfocused and focused windows, respectively.
---
+-- Border colors for unfocused and focused windows, respectively
+
 myNormalBorderColor  = "#ffffff"
 myFocusedBorderColor = "#00ffff"
 
 -- Custom variables
 
 myEmacs = "emacsclient -c -a 'emacs' "
+
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
 --
-myKeys :: [(String , X ())]
+--myKeys :: [(String , X ())]
 myKeys =
     -- launch a terminal
     [ ("M-S-<Return>", spawn $ myTerminal)
@@ -114,7 +126,7 @@ myKeys =
     , ("M-<Space>", sendMessage NextLayout)
 
     --  Reset the layouts on the current workspace to default
-    --, ("M-S-<Space>", setLayout $ XMonad.layoutHook conf)
+    -- , ("M-S-<Space>", setLayout $ XMonad.layoutHook XConfig)
 
     -- Resize viewed windows to the correct size
     , ("M-n", refresh)
@@ -165,10 +177,10 @@ myKeys =
     , ("M-S-q", io (exitWith ExitSuccess))
 
     -- Restart xmonad
-    , ("M-q", spawn "xmonad --recompile && xmonad --restart")
+    , ("M-q", spawn $ "xmonad --recompile && xmonad --restart; killall xmobar; xmobar " ++ myXmobar ++ " &")
 
     -- Open emacs
-    , ("M-e e", spawn (myEmacs ++ ("-e '(dashboard-refresh-buffer)'")))
+    , ("M-e e", spawn $ myEmacs ++ "-e '(dashboard-refresh-buffer)'")
 
     -- Increase Brightness
     , ("<XF86MonBrightnessUp>", spawn "brightnessctl set +5%")
@@ -177,10 +189,13 @@ myKeys =
     , ("<XF86MonBrightnessDown>", spawn "brightnessctl set 5-%")
 
     -- Increase volume
-    , ("<XF86AudioRaiseVolume>", spawn "pamixer -i 5")
+    , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 5%+")
 
     -- Decrease volume
-    , ("<XF86AudioLowerVolume>", spawn "pamixer -d 5")
+    , ("<XF86AudioLowerVolume>", spawn "amixer set Master 5%-")
+
+    -- Mute and unmute
+    , ("<XF86AudioMute>", spawn "pamixer -t")
 
     -- No borders
     --, ("M-S-n" SendMessage )
@@ -253,20 +268,25 @@ mySpacing i = spacingRaw False (Border i i i i) True (Border i i i i) True
 mySpacing' :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
 mySpacing' i = spacingRaw True (Border i i i i) True (Border i i i i) True
 
-myLayout = mySpacing i $ avoidStruts ( smartBorders tiled ||| Mirror tiled ||| noBorders Full )
+myLayout
+  = renamed [CutWordsLeft 1] $ mySpacing i $ avoidStruts $ smartBorders $ tiled
+    ||| floats
+    ||| magnifiedTiled
+    ||| Mirror tiled
+    ||| noBorders Full
   where
-    -- default tiling algorithm partitions the screen into two panes
-    tiled   = Tall nmaster delta ratio
+    magnifiedTiled = renamed [Replace "Magnified"] $ Mag.magnifiercz' 1.1 basic
+    tiled = renamed [Replace "Tiled"] basic
+    floats = renamed [Replace "Floats"] $ limitWindows 20 simplestFloat
 
+    -- default tiling algorithm partitions the screen into two panes
+    basic = Tall nmaster delta ratio
     -- The default number of windows in the master pane
     nmaster = 1
-
     -- Default proportion of screen occupied by master pane
     ratio   = 1/2
-
     -- Percent of screen to increment by when resizing panes
     delta   = 3/100
-
     -- Border space
     i = 10
 
@@ -287,9 +307,10 @@ myLayout = mySpacing i $ avoidStruts ( smartBorders tiled ||| Mirror tiled ||| n
 --
 myManageHook = composeAll
     [ className =? "MPlayer"        --> doFloat
-    , className =? "Gimp"           --> doFloat
+    -- , className =? "Gimp"           --> doFloat
+    , isDialog                      --> doFloat
     , resource  =? "desktop_window" --> doIgnore
-    , resource  =? "kdesktop"       --> doIgnore ] <+> F.fullscreenManageHook
+    , resource  =? "kdesktop"       --> doIgnore ] <+> insertPosition Master Newer
 
 ------------------------------------------------------------------------
 -- Event handling
@@ -303,7 +324,7 @@ myManageHook = composeAll
 -- It will add EWMH event handling to your custom event hooks by
 -- combining them with ewmhDesktopsEventHook.
 --
-myEventHook = fullscreenEventHook
+myEventHook = All True
 
 ------------------------------------------------------------------------
 -- Status bars and logging
@@ -337,18 +358,56 @@ myStartupHook :: X ()
 myStartupHook = do
   spawnOnce "feh --bg-fill /usr/share/wallpapers/wp1.jpg"  -- feh set random wallpaper
   spawnOnce "xsetroot -cursor_name left_ptr"
+  -- spawnOnce "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 10 --transparent true --tint 0x5f5f5f --height 18 &"
+  spawnOnce "xscreensaver -no-splash &"
+  -- spawnOnce "nm-applet --sm-disable &"
+  spawnOnce "picom &"
+  spawnOnce "wal -R"
   spawnOnce "/usr/bin/emacs --daemon"
+
+------------------------------------------------------------------------
+
+-- Set colours for xmobar
+
+blue, lowWhite, magenta, red, white, yellow :: String -> String
+magenta  = xmobarColor "#ff79c6" ""
+blue     = xmobarColor "#bd93f9" ""
+white    = xmobarColor "#f8f8f2" ""
+yellow   = xmobarColor "#f1fa8c" ""
+red      = xmobarColor "#ff5555" ""
+lowWhite = xmobarColor "#bbbbbb" ""
+
+-- Xmobar config
+myXmobarPP :: PP
+myXmobarPP = def
+    { ppSep             = magenta " • "
+    , ppTitleSanitize   = xmobarStrip
+    , ppCurrent         = wrap " " "" . xmobarBorder "Top" color5 2
+    , ppHidden          = white . wrap " " ""
+    , ppHiddenNoWindows = lowWhite . wrap " " ""
+    , ppUrgent          = red . wrap (yellow "!") (yellow "!")
+    , ppOrder           = \[ws, l, _, wins] -> [ws, l]
+    , ppExtras          = [logTitles formatFocused formatUnfocused]
+    }
+  where
+    formatFocused   = wrap (white    "[") (white    "]") . magenta . ppWindow
+    formatUnfocused = wrap (lowWhite "[") (lowWhite "]") . blue    . ppWindow
+
+-- Windows should have *some* title, which should not not exceed a sane length.
+ppWindow :: String -> String
+ppWindow = xmobarRaw . (\w -> if null w then "Untitled" else w) . shorten 30
+
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
 
 -- Run xmonad with the settings you specify. No need to modify this.
---
 main = do
-  xmproc <- spawnPipe "xmobar -x 0 /home/adeeb/.xmobarrc"
+  xmproc <- spawnPipe $ "xmobar " ++ myXmobar
   xmonad
+    $ ewmhFullscreen
     $ ewmh
-    $ F.fullscreenSupport
+    $ withEasySB (statusBarProp ("xmobar " ++ myXmobar) (pure myXmobarPP)) defToggleStrutsKey
     $ docks defaults
 
 -- A structure containing your configuration settings, overriding
@@ -357,7 +416,7 @@ main = do
 --
 -- No need to modify this.
 --
-defaults = defaultConfig {
+defaults = def {
       -- simple stuff
         terminal           = myTerminal,
         focusFollowsMouse  = myFocusFollowsMouse,
@@ -376,7 +435,7 @@ defaults = defaultConfig {
       -- hooks, layouts
         layoutHook         = myLayout,
         manageHook         = myManageHook,
-        handleEventHook    = myEventHook,
+        -- handleEventHook    = myEventHook,
         logHook            = myLogHook,
         startupHook        = myStartupHook
     } `additionalKeysP` myKeys
