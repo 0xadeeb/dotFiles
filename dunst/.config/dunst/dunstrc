@@ -29,7 +29,7 @@
     # the top and down respectively.
     # The width can be negative.  In this case the actual width is the
     # screen width minus the width defined in within the geometry option.
-    geometry = "300x60-15+46"
+    geometry = "500x60-15+46"
 
     # Show how many messages are currently hidden (because of geometry).
     indicate_hidden = yes
@@ -166,7 +166,7 @@
     max_icon_size = 32
 
     # Paths to default icons.
-    icon_path = /usr/share/icons/candy-icons/apps/scalable:/usr/share/icons/candy-icons/devices/scalable/
+    icon_path = /home/adeeb/.local/share/icons/candy-icons
 
     ### History ###
 
