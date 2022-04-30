@@ -16,7 +16,7 @@ function is_mute {
 }
 
 function send_notification {
-    DIR=`dirname "$0"`
+	DIR=`dirname $(dirname "$0")`
     volume=`get_volume`
     # Make the bar with the special character ─ (it's not dash -)
     # https://en.wikipedia.org/wiki/Box-drawing_character

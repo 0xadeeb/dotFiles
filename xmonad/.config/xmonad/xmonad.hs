@@ -228,10 +228,12 @@ myStartupHook :: X ()
 myStartupHook = do
   spawn $ "wal -i " ++ myWallpapers ++ " && wal -R"  -- pywal sets random wallpaper
   spawnOnce "xsetroot -cursor_name left_ptr"
+  spawnOnce "~/.config/conky/conky-startup.sh"
   -- spawnOnce "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 10 --transparent true --tint 0x5f5f5f --height 18 &"
   -- spawnOnce "xscreensaver -no-splash &"
   -- spawnOnce "nm-applet --sm-disable &"
   spawnOnce "picom &"
+  spawnOnce "xfce4-power-manager &"
   spawnOnce "/usr/bin/emacs --daemon"
 
 blue, lowWhite, magenta, red, white, yellow :: String -> String

@@ -15,7 +15,7 @@ function get_brightness {
 }
 
 function send_notification {
-    DIR=`dirname "$0"`
+	DIR=`dirname $(dirname "$0")`
     icon_name="${icon_path}notification-display-brightness.svg"
     brightness=`get_brightness`
     # Make the bar with the special character ─ (it's not dash -)
