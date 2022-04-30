@@ -29,7 +29,7 @@ config =
       -- , position = TopW C 98
       -- , border =             TopB 10
       borderColor = "#646464",
-      iconRoot = "/home/adeeb/.xmonad/xpmImages/", -- default: ".""
+      iconRoot = "/home/adeeb/.config/xmonad/xpmImages/", -- default: ".""
 
       -- layout
       sepChar = "%", -- delineator between plugin names and straight text
