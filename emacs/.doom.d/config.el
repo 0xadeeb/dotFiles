@@ -5,6 +5,11 @@
       ;;confirm-kill-emacs nil
 )
 
+(when (or (memq window-system '(mac ns x))(daemonp))
+  (exec-path-from-shell-initialize))
+;; (when (daemonp)
+;;   (exec-path-from-shell-initialize))
+
 (setq doom-theme 'doom-dracula)
 
 (setq scroll-margin 3)

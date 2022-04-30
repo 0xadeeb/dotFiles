@@ -57,6 +57,7 @@
 (package! company-box)
 (package! company-tabnine)
 (package! dashboard)
+(package! exec-path-from-shell)
 (package! fira-code-mode)
 (package! key-chord)
 (package! lsp-haskell)

@@ -6,6 +6,7 @@
 * Table of contents :toc:
 - [[#instructions][Instructions]]
 - [[#default-configs][Default configs]]
+- [[#set-path-variables-in-emacs-from-shell][Set path variables in emacs from shell]]
 - [[#visual][Visual]]
   - [[#general-information][General Information]]
   - [[#theme][Theme]]
@@ -59,6 +60,15 @@
       display-line-numbers-type 'relative
       ;;confirm-kill-emacs nil
 )
+#+end_src
+
+* Set path variables in emacs from shell
+Emacs instance launched as a GUI app inherits a default minimal set of environment variables that are probably not the ones that are used in a terminal window. Therefore the path is imported from shell.
+#+begin_src emacs-lisp
+(when (or (memq window-system '(mac ns x))(daemonp))
+  (exec-path-from-shell-initialize))
+;; (when (daemonp)
+;;   (exec-path-from-shell-initialize))
 #+end_src
 
 * Visual

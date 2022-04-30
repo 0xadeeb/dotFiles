@@ -6,7 +6,7 @@
 * Table of contents :toc:
 - [[#imports][Imports]]
 - [[#setting-up-variables-for-future-use][Setting up variables for future use]]
-  - [[#the-preferred-terminal-program-which-is-used-in-a-binding-below-and-by-certain-contrib-modules][The preferred terminal program, which is used in a binding below and by certain contrib modules.]]
+  - [[#the-preferred-terminal-program][The preferred terminal program]]
   - [[#whether-focus-follows-the-mouse-pointer][Whether focus follows the mouse pointer.]]
   - [[#width-of-the-window-border-in-pixels][Width of the window border in pixels.]]
   - [[#mod-key][Mod Key]]
@@ -80,9 +80,9 @@ import Colors
 
 * Setting up variables for future use
 
-** The preferred terminal program, which is used in a binding below and by certain contrib modules.
+** The preferred terminal program
 #+begin_src haskell
-myTerminal      = "konsole"
+myTerminal      = "kitty"
 #+end_src
 
 ** Whether focus follows the mouse pointer.
@@ -135,10 +135,11 @@ Add, modify or remove key bindings here.
 myKeys :: [(String , X ())]
 myKeys =
     -- launch a terminal
-    [ ("M-S-<Return>", spawn $ myTerminal)
+    [ ("M-S-<Return>", spawn myTerminal)
 
     -- launch dmenu
     , ("M-p", spawn "rofi -show drun")
+    , ("M-o", spawn "rofi -show filebrowser")
 
     -- launch gmrun
     , ("M-S-p", spawn "gmrun")
@@ -201,25 +202,28 @@ myKeys =
     , ("M-S-q", io (exitWith ExitSuccess))
 
     -- Restart xmonad
-    , ("M-q", spawn $ "xmonad --recompile && xmonad --restart; killall xmobar; xmobar " ++ myXmobar ++ " &")
+    , ("M-q", spawn "xmonad --recompile && ( killall xmobar ; xmonad --restart )")
 
     -- Open emacs
     , ("M-e e", spawn $ myEmacs ++ "-e '(dashboard-refresh-buffer)'")
 
+    -- Lock screen
+    , ("M-S-l", spawn  "betterlockscreen -l")
+
     -- Increase Brightness
-    , ("<XF86MonBrightnessUp>", spawn "brightnessctl set +5%")
+    , ("<XF86MonBrightnessUp>", spawn "~/.config/dunst/brightness/brightnessControl.sh up")
 
     -- Decrease Brightness
-    , ("<XF86MonBrightnessDown>", spawn "brightnessctl set 5-%")
+    , ("<XF86MonBrightnessDown>", spawn "~/.config/dunst/brightness/brightnessControl.sh down")
 
     -- Increase volume
-    , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 5%+")
+    , ("<XF86AudioRaiseVolume>", spawn "~/.config/dunst/volume/volume.sh up")
 
     -- Decrease volume
-    , ("<XF86AudioLowerVolume>", spawn "amixer set Master 5%-")
+    , ("<XF86AudioLowerVolume>", spawn "~/.config/dunst/volume/volume.sh down")
 
     -- Mute and unmute
-    , ("<XF86AudioMute>", spawn "pamixer -t")
+    , ("<XF86AudioMute>", spawn "~/.config/dunst/volume/volume.sh toggle")
 
     -- No borders
     --, ("M-S-n" SendMessage )
@@ -236,34 +240,33 @@ mod-[1..9], Switch to workspace N and mod-shift-[1..9], Move client to workspace
 #+end_src
 
 ** Keybinding to switch physical screens
-#+begin_src haskell
-    -- ++
-    -- -- mod-{w,e,r}, Switch to physical/Xinerama screens 1, 2, or 3
-    -- -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
-    -- --
-    -- [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
-    --     | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
-    --     , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
+~mod-{w,e,r}~, Switch to physical/Xinerama screens 1, 2, or 3
+~mod-shift-{w,e,r}~, Move client to screen 1, 2, or 3
+#+begin_src haskell :tangle no
+    ++
+    [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
+        | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
+        , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
 #+end_src
 
 
 ** Mouse bindings
 #+begin_src haskell
-myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
+myMouseBindings XConfig {XMonad.modMask = modm} = M.fromList
 
     -- mod-button1, Set the window to floating mode and move by dragging
     -- [ ((modm, button1), (\w -> focus w >> mouseMoveWindow w
     --                                    >> windows W.shiftMaster))
 
-    [ ((modm, button1), (\w -> focus w >> mouseMoveWindow w
-                                       >> afterDrag (snapMagicResize [L,R,U,D] (Just 50) (Just 50) w)))
+    [ ((modm, button1), \w -> focus w >> mouseMoveWindow w
+                                       >> afterDrag (snapMagicResize [L,R,U,D] (Just 50) (Just 50) w))
 
     -- mod-button2, Raise the window to the top of the stack
-    , ((modm, button2), (\w -> focus w >> windows W.shiftMaster))
+    , ((modm, button2), \w -> focus w >> windows W.shiftMaster)
 
     -- mod-button3, Set the window to floating mode and resize by dragging
-    , ((modm, button3), (\w -> focus w >> mouseResizeWindow w
-                                       >> windows W.shiftMaster))
+    , ((modm, button3), \w -> focus w >> mouseResizeWindow w
+                                       >> windows W.shiftMaster)
 
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
     ]
@@ -312,7 +315,7 @@ myLayout
 * Window rules:
 Execute arbitrary actions and WindowSet manipulations when managing a new window. You can use this to, for example, always float a particular program, or have a client always appear on a particular workspace.
 
-To find the property name associated with a program, use ~ > xprop | grep WM_CLASS ~ and click on the client you're interested in.
+To find the property name associated with a program, use ~> xprop | grep WM_CLASS~ and click on the client you're interested in.
 
 To match on the WM_NAME, you can use 'title' in the same way that 'className' and 'resource' are used below.
 #+begin_src haskell
