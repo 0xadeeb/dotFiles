@@ -29,6 +29,7 @@ import XMonad.Util.EZConfig (additionalKeysP)
 
 -- Layouts
 import XMonad.Layout.SimplestFloat
+import XMonad.Layout.Grid
 
 -- Layout modifiers
 import XMonad.Layout.LayoutModifier
@@ -192,13 +193,15 @@ mySpacing' :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spac
 mySpacing' i = spacingRaw True (Border i i i i) True (Border i i i i) True
 
 myLayout
-  = renamed [CutWordsLeft 1] $ mySpacing i $ avoidStruts $ smartBorders $ tiled
+  = renamed [CutWordsLeft 1] $ mySpacing 8 $ avoidStruts $ smartBorders $ tiled
+    ||| grid
     ||| floats
     ||| magnifiedTiled
     ||| Mirror tiled
     ||| noBorders Full
   where
     magnifiedTiled = renamed [Replace "Magnified"] $ Mag.magnifiercz' 1.1 basic
+    grid = renamed [Replace "Grid"] $ limitWindows 12 $ Grid
     tiled = renamed [Replace "Tiled"] basic
     floats = renamed [Replace "Floats"] $ limitWindows 20 simplestFloat
 
@@ -211,7 +214,7 @@ myLayout
     -- Percent of screen to increment by when resizing panes
     delta   = 3/100
     -- Border space
-    i = 10
+    i = 8
 
 myManageHook = composeAll
     [ className =? "MPlayer"        --> doFloat
@@ -226,7 +229,8 @@ myLogHook = return ()
 
 myStartupHook :: X ()
 myStartupHook = do
-  spawn $ "wal -i " ++ myWallpapers ++ " && wal -R"  -- pywal sets random wallpaper
+  -- spawn $ "wal -i " ++ myWallpapers ++ " && wal -R"  -- pywal sets random wallpaper
+  spawnOnce "feh --bg-scale ~/wallpapers/5.jpg"  -- set wallpaper
   spawnOnce "xsetroot -cursor_name left_ptr"
   spawnOnce "~/.config/conky/conky-startup.sh"
   -- spawnOnce "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 10 --transparent true --tint 0x5f5f5f --height 18 &"
@@ -267,7 +271,7 @@ main = do
   xmonad
     $ ewmhFullscreen
     $ ewmh
-    $ withEasySB (statusBarProp ("sleep 2 && xmobar " ++ myXmobar) (pure myXmobarPP)) defToggleStrutsKey
+    $ withEasySB (statusBarProp ("xmobar " ++ myXmobar) (pure myXmobarPP)) defToggleStrutsKey
     $ docks defaults
 
 defaults = def {

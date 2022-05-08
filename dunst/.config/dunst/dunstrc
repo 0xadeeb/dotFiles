@@ -396,6 +396,15 @@
 #    summary = "foobar"
 #    skip_display = yes
 
+[volume-notification]
+	appname = "volumeControl"
+	script = "~/.local/bin/volumeChangeAudio.sh"
+	history_ignore = true
+
+[brightness-notification]
+	appname = "brightnessControl"
+	history_ignore = true
+
 #[signed_on]
 #    appname = Pidgin
 #    summary = "*signed on*"

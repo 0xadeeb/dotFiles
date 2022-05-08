@@ -16,18 +16,17 @@ function is_mute {
 }
 
 function send_notification {
-	DIR=`dirname $(dirname "$0")`
+    DIR=`dirname $(dirname "$0")`
     volume=`get_volume`
     # Make the bar with the special character ─ (it's not dash -)
     # https://en.wikipedia.org/wiki/Box-drawing_character
     # bar=$(seq -s "─" $(($volume/5)) | sed 's/[0-9]//g')
     if [ "$volume" = "0" ]; then
         icon_name="${icon_path}notification-audio-volume-muted.svg"
-        $DIR/notify-send.sh "$volume""      " -i "$icon_name" -t 2000 --replace=555
+        $DIR/notify-send.sh "$volume""      " -i "$icon_name" -a "volumeControl" -t 2000 --replace=555
     else
         if [  "$volume" -lt "10" ]; then
             icon_name="${icon_path}notification-audio-volume-low.svg"
-            $DIR/notify-send.sh "$volume""     " -i "$icon_name" --replace=555 -t 2000
         else
             if [ "$volume" -lt "30" ]; then
                 icon_name="${icon_path}notification-audio-volume-low.svg"
@@ -40,9 +39,9 @@ function send_notification {
             fi
         fi
     fi
-    bar=$(seq -s "─" $(($volume/5)) | sed 's/[0-9]//g')
+    bar=$(seq -s "─" $(($volume/5 + 1)) | sed 's/[0-9]//g')
     # Send the notification
-    $DIR/notify-send.sh "$volume""     ""$bar" -i "$icon_name" -t 2000  --replace=555
+    $DIR/notify-send.sh "$volume""     ""$bar" -i "$icon_name" -a "volumeControl" -t 2000  --replace=555
 
 }
 
@@ -63,8 +62,8 @@ case $1 in
         # Toggle mute
         amixer set Master 1+ toggle > /dev/null
         if is_mute ; then
-            DIR=`dirname "$0"`
-            $DIR/notify-send.sh -i "${icon_path}notification-audio-volume-muted.svg" --replace=555 -u normal "Mute" -t 2000
+            DIR=`dirname $(dirname "$0")`
+            $DIR/notify-send.sh -i "${icon_path}notification-audio-volume-muted.svg" -a "volumeControl" --replace=555 -u normal "Mute" -t 2000
         else
             send_notification
         fi

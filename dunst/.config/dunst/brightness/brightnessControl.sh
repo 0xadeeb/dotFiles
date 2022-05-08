@@ -15,14 +15,14 @@ function get_brightness {
 }
 
 function send_notification {
-	DIR=`dirname $(dirname "$0")`
+    DIR=`dirname $(dirname "$0")`
     icon_name="${icon_path}notification-display-brightness.svg"
     brightness=`get_brightness`
     # Make the bar with the special character ─ (it's not dash -)
     # https://en.wikipedia.org/wiki/Box-drawing_character
     bar=$(seq -s "─" 0 $((brightness / 5)) | sed 's/[0-9]//g')
     # Send the notification
-    $DIR/notify-send.sh "$brightness""     ""$bar" -i "$icon_name" -t 2000  --replace=555
+    $DIR/notify-send.sh "$brightness""     ""$bar" -i "$icon_name" -a "brightnessControl" -t 2000  --replace=555
 }
 
 case $1 in
