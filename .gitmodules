@@ -4,3 +4,6 @@
 [submodule "xmonad/.config/xmonad/xmonad-contrib-Git"]
 	path = xmonad/.config/xmonad/xmonad-contrib-Git
 	url = https://github.com/xmonad/xmonad-contrib
+[submodule "dunst/.config/dunst/notify-git"]
+	path = dunst/.config/dunst/notify-git
+	url = git@github.com:vlevit/notify-send.sh.git
