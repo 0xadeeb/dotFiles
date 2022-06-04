@@ -1,4 +1,5 @@
-pfetch
+#pfetch
+neofetch
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -178,8 +179,10 @@ function up () {
     echo "Couldn't go up $limit dirs.";
   fi
 }
+# For smart history search
+eval "$(mcfly init zsh)"
 
 ### SETTING THE STARSHIP PROMPT ###
 eval "$(starship init zsh)"
 
-bindkey '  ' autosuggest-accept
+#bindkey '  ' autosuggest-accept

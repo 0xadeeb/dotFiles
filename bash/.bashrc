@@ -15,7 +15,7 @@ alias la='exa -a'
 alias ll='exa -l'
 alias lla='exa -al'
 alias lt='exa -aT --color=always --group-directories-first'
-alias grep='grep --color=auto'
+#alias grep='grep --color=auto'
 #alias dotf='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME' 		#for dotfiles
 #alias reboot='sudo reboot'
 #alias shutdown='shutdown now'
