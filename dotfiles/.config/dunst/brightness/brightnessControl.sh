@@ -22,7 +22,7 @@ function send_notification {
     # https://en.wikipedia.org/wiki/Box-drawing_character
     bar=$(seq -s "─" 0 $((brightness / 5)) | sed 's/[0-9]//g')
     # Send the notification
-    $DIR/notify-git/notify-send.sh "$brightness""     ""$bar" -i "$icon_name" -a "brightnessControl" -t 2000  --replace=555
+    $DIR/notify-Git/notify-send.sh "$brightness""     ""$bar" -i "$icon_name" -a "brightnessControl" -t 2000  --replace=555
 }
 
 case $1 in
