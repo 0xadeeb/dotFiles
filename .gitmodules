@@ -1,12 +1,12 @@
-[submodule "xmonad/xmonad/xmonad-dbus-Git"]
-	path = dotfiles/.config/xmonad/xmonad-dbus-Git
-	url = git@github.com:troydm/xmonad-dbus.git
-[submodule "xmonad/xmonad/xmonad-git"]
+[submodule "dotfiles/.config/xmonad/xmonad-git"]
 	path = dotfiles/.config/xmonad/xmonad-git
-	url = git@github.com:xmonad/xmonad.git
-[submodule "xmonad/xmonad/xmonad-contrib-git"]
+	url = https://github.com/xmonad/xmonad.git
+[submodule "dotfiles/.config/xmonad/xmonad-contrib-git"]
 	path = dotfiles/.config/xmonad/xmonad-contrib-git
-	url = git@github.com:xmonad/xmonad-contrib.git
-[submodule "dunst/dunst/notify-Git"]
-	path = dotfiles/.config/dunst/notify-Git
-	url = git@github.com:vlevit/notify-send.sh.git
+	url = https://github.com/xmonad/xmonad-contrib.git
+[submodule "dotfiles/.config/xmonad/xmonad-dbus-git"]
+	path = dotfiles/.config/xmonad/xmonad-dbus-git
+	url = https://github.com/troydm/xmonad-dbus.git
+[submodule "dotfiles/.config/dunst/notify-git"]
+	path = dotfiles/.config/dunst/notify-git
+	url = https://github.com/vlevit/notify-send.sh.git
