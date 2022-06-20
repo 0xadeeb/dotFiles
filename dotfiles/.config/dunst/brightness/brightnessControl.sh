@@ -9,6 +9,7 @@
 # https://gist.github.com/sebastiencs/5d7227f388d93374cebdf72e783fbd6a
 
 icon_path="/usr/share/icons/Faba/48x48/notifications/"
+notify="notify-git"
 
 function get_brightness {
     echo $(($(brightnessctl get)*100/$(brightnessctl max)))
@@ -22,7 +23,7 @@ function send_notification {
     # https://en.wikipedia.org/wiki/Box-drawing_character
     bar=$(seq -s "─" 0 $((brightness / 5)) | sed 's/[0-9]//g')
     # Send the notification
-    $DIR/notify-Git/notify-send.sh "$brightness""     ""$bar" -i "$icon_name" -a "brightnessControl" -t 2000  --replace=555
+    $DIR/$notify/notify-send.sh "$brightness""     ""$bar" -i "$icon_name" -a "brightnessControl" -t 2000  --replace=555
 }
 
 case $1 in

@@ -6,6 +6,7 @@
 # $./volume.sh toggle
 
 icon_path="/usr/share/icons/Faba/48x48/notifications/"
+notify="notify-git"
 
 function get_volume {
     amixer get Master | grep '%' | head -n 1 | cut -d '[' -f 2 | cut -d '%' -f 1
@@ -23,7 +24,7 @@ function send_notification {
     # bar=$(seq -s "─" $(($volume/5)) | sed 's/[0-9]//g')
     if [ "$volume" = "0" ]; then
         icon_name="${icon_path}notification-audio-volume-muted.svg"
-        $DIR/notify-Git/notify-send.sh "$volume""      " -i "$icon_name" -a "volumeControl" -t 2000 --replace=555
+        $DIR/$notify/notify-send.sh "$volume""      " -i "$icon_name" -a "volumeControl" -t 2000 --replace=555
     else
         if [  "$volume" -lt "10" ]; then
             icon_name="${icon_path}notification-audio-volume-low.svg"
@@ -41,7 +42,7 @@ function send_notification {
     fi
     bar=$(seq -s "─" $(($volume/5 + 1)) | sed 's/[0-9]//g')
     # Send the notification
-    $DIR/notify-Git/notify-send.sh "$volume""     ""$bar" -i "$icon_name" -a "volumeControl" -t 2000  --replace=555
+    $DIR/$notify/notify-send.sh "$volume""     ""$bar" -i "$icon_name" -a "volumeControl" -t 2000  --replace=555
 
 }
 
@@ -63,7 +64,7 @@ case $1 in
         amixer set Master 1+ toggle > /dev/null
         if is_mute ; then
             DIR=`dirname $(dirname "$0")`
-            $DIR/notify-Git/notify-send.sh -i "${icon_path}notification-audio-volume-muted.svg" -a "volumeControl" --replace=555 -u normal "Mute" -t 2000
+            $DIR/$notify/notify-send.sh -i "${icon_path}notification-audio-volume-muted.svg" -a "volumeControl" --replace=555 -u normal "Mute" -t 2000
         else
             send_notification
         fi

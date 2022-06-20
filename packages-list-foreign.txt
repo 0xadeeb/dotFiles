@@ -1,0 +1,15 @@
+ani-cli
+ant-dracula-gtk-theme
+betterlockscreen-git
+brave-bin
+nerd-fonts-mononoki
+oblogout-py3-git
+pacman-hook-list-installed-packages
+paru
+picom-jonaburg-git
+polkit-explorer-git
+ttf-icomoon-feather
+ttf-twemoji
+xmonad-contrib-git
+xmonad-dbus-git
+xmonad-git

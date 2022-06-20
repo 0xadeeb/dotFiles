@@ -28,6 +28,7 @@ alias eb='earbuds'
 alias brc='vim ~/.bashrc'
 alias prg='g++ -o test'
 alias ps='procs'
+alias yay='paru'
 
 #Function for jumping up directories
 up () {
