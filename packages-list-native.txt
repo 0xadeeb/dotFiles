@@ -1,7 +1,9 @@
 alacritty
+alsa-utils
 autoconf
 automake
 base
+bash-completion
 bison
 bluez
 bluez-utils
@@ -9,6 +11,7 @@ brightnessctl
 conky
 dialog
 dmenu
+dosfstools
 dunst
 efibootmgr
 emacs
@@ -19,10 +22,12 @@ feh
 flex
 gcc
 git
+gnome-keyring
 groff
 grub
 gvfs
 htop
+inetutils
 kitty
 libtool
 linux
@@ -36,6 +41,7 @@ mcfly
 mpv
 mtools
 nemo
+nemo-fileroller
 neofetch
 network-manager-applet
 networkmanager
@@ -43,7 +49,6 @@ noto-fonts-emoji
 ntfs-3g
 nvidia-dkms
 nvidia-utils
-openssh
 os-prober
 patch
 pavucontrol
@@ -52,11 +57,15 @@ pipewire
 pipewire-alsa
 pipewire-pulse
 pkgconf
+polkit-kde-agent
 polybar
 procs
 python-pyalsa
+reflector
+ripgrep
 rofi
 sddm
+snapper
 starship
 stow
 sudo
@@ -76,6 +85,8 @@ which
 wireless_tools
 wmctrl
 wpa_supplicant
+xdg-user-dirs
+xdg-utils
 xf86-video-vesa
 xfce4-power-manager
 xorg-bdftopcf
@@ -115,11 +126,9 @@ xorg-xlsatoms
 xorg-xlsclients
 xorg-xmodmap
 xorg-xpr
-xorg-xprop
 xorg-xrandr
 xorg-xrdb
 xorg-xrefresh
-xorg-xset
 xorg-xsetroot
 xorg-xvinfo
 xorg-xwayland
