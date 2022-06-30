@@ -1,3 +1,12 @@
 [submodule "dotfiles/.config/dunst/notify-git"]
 	path = dotfiles/.config/dunst/notify-git
 	url = https://github.com/vlevit/notify-send.sh.git
+[submodule "dotfiles/.config/xmonad/xmoand-git"]
+	path = dotfiles/.config/xmonad/xmonad-Git
+	url = https://github.com/xmonad/xmonad
+[submodule "dotfiles/.config/xmonad/xmonad-contrib-Git"]
+	path = dotfiles/.config/xmonad/xmonad-contrib-Git
+	url = https://github.com/xmonad/xmonad-contrib
+[submodule "dotfiles/.config/xmonad/xmonad-dbus-Git"]
+	path = dotfiles/.config/xmonad/xmonad-dbus-Git
+	url = https://github.com/troydm/xmonad-dbus.git

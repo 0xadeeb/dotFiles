@@ -28,13 +28,13 @@ function send_notification {
 
 case $1 in
     up)
-        # increase the backlight by 5%
-        brightnessctl set +5%
+        # increase the backlight by 2%
+        brightnessctl set +2%
         send_notification
         ;;
     down)
-        # decrease the backlight by 5%
-        brightnessctl set 5-%
+        # decrease the backlight by 2%
+        brightnessctl set 2-%
         send_notification
         ;;
 esac

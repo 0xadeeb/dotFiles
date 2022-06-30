@@ -14,5 +14,3 @@ snapper-gui-git
 snapper-rollback
 ttf-icomoon-feather
 ttf-twemoji
-xmonad-contrib-git
-xmonad-dbus-git

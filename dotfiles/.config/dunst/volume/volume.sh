@@ -50,13 +50,13 @@ case $1 in
     up)
         # Set the volume on (if it was muted)
         amixer set Master on > /dev/null
-        # Up the volume (+ 5%)
-        amixer sset Master 5%+ > /dev/null
+        # Up the volume (+ 2%)
+        amixer sset Master 2%+ > /dev/null
         send_notification
         ;;
     down)
         amixer set Master on > /dev/null
-        amixer sset Master 5%- > /dev/null
+        amixer sset Master 2%- > /dev/null
         send_notification
         ;;
     toggle)
