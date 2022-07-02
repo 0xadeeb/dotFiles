@@ -1,5 +1,5 @@
 -- Basic imports
-import XMonad -- hiding ( (|||) )
+import XMonad
 import System.Exit
 
 -- Actions
@@ -30,17 +30,20 @@ import XMonad.Util.Loggers
 import XMonad.Util.EZConfig (additionalKeysP)
 
 -- Layouts
-import XMonad.Layout.SimplestFloat
-import XMonad.Layout.Grid -- hiding ( (|||) )
+import XMonad.Layout.Grid
 import XMonad.Layout.LayoutCombinators
+import qualified XMonad.Layout.Magnifier as Mag
+import XMonad.Layout.SimplestFloat
+import XMonad.Layout.Tabbed
 
 -- Layout modifiers
+import XMonad.Layout.Decoration
 import XMonad.Layout.LayoutModifier
-import XMonad.Layout.Spacing
 import XMonad.Layout.LimitWindows (limitWindows, increaseLimit, decreaseLimit)
-import XMonad.Layout.Renamed
 import XMonad.Layout.NoBorders
-import qualified XMonad.Layout.Magnifier as Mag
+import XMonad.Layout.Renamed
+import XMonad.Layout.Spacing
+import XMonad.Layout.TabBarDecoration
 
 -- For polybar
 import qualified XMonad.DBus as D
@@ -55,6 +58,26 @@ myBorderWidth   = 0
 
 myModMask       = mod4Mask
 myModMask'       = mod3Mask
+
+-- setting colors for tabs layout and tabs sublayout.
+base03  = "#002b36"
+base02  = "#073642"
+base01  = "#586e75"
+base00  = "#657b83"
+base0   = "#839496"
+base1   = "#93a1a1"
+base2   = "#eee8d5"
+base3   = "#fdf6e3"
+active      = "#bd93f9"
+myTabTheme = def
+    {
+     activeColor           = active
+    , inactiveColor         = base02
+    , activeBorderColor     = active
+    , inactiveBorderColor   = base02
+    , activeTextColor       = base03
+    , inactiveTextColor     = base00
+    }
 
 -- A tagging example:
 --  workspaces = ["web", "irc", "code" ] ++ map show [4..9]
@@ -91,6 +114,7 @@ myKeys =
 
     -- Jump to layouts
     , ("M-f" , sendMessage $ JumpToLayout "Full"     ) --Switch to the full layout
+    , ("M-S-t" , sendMessage $ JumpToLayout "Tabbed"     ) --Switch to the tabbed layout
     , ("M-g" , sendMessage $ JumpToLayout "Grid"     ) --Switch to the grid layout
 
     -- Resize viewed windows to the correct size
@@ -199,26 +223,65 @@ myMouseBindings XConfig {XMonad.modMask = modm} = M.fromList
 mySpacing :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
 mySpacing i = spacingRaw False (Border i i i i) True (Border i i i i) True
 
--- Below is a variation of the above except no borders are applied
--- if fewer than two windows. So a single window has no gaps.
-mySpacing' :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
-mySpacing' i = spacingRaw True (Border i i i i) True (Border i i i i) True
+myTabbedSpacing :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
+myTabbedSpacing i = spacingRaw False (Border 0 i i i) True (Border 0 i i i) True
 
 myLayout
-  = renamed [CutWordsLeft 1] $ mySpacing 8 $ avoidStruts $ smartBorders $ tiled
+  = tiled
     ||| grid
     ||| floats
     ||| magnifiedTiled
-    ||| Mirror tiled
-    ||| noBorders Full
+    ||| mirror
+    ||| full
+    ||| tabs
   where
-    magnifiedTiled = renamed [Replace "Magnified"] $ Mag.magnifiercz' 1.1 basic
-    grid = renamed [Replace "Grid"] $ limitWindows 12 $ Grid
-    tiled = renamed [Replace "Tiled"] basic
-    floats = renamed [Replace "Floats"] $ limitWindows 20 simplestFloat
+    tiled = renamed [Replace "Tiled"]
+                     $ mySpacing gap
+                     $ avoidStruts
+                     $ smartBorders
+                     $ Tall nmaster delta ratio
 
-    -- default tiling algorithm partitions the screen into two panes
-    basic = Tall nmaster delta ratio
+    magnifiedTiled = renamed [Replace "Magnified"]
+                     $ mySpacing gap
+                     $ avoidStruts
+                     $ smartBorders
+                     $ Mag.magnifiercz' 1.1
+                     $ Tall nmaster delta ratio
+
+    grid = renamed [Replace "Grid"]
+                     $ mySpacing gap
+                     $ avoidStruts
+                     $ smartBorders
+                     $ limitWindows 12
+                     $ Grid
+
+    full = renamed [CutWordsLeft 1]
+                     $ mySpacing gap
+                     $ avoidStruts
+                     $ smartBorders
+                     $ noBorders
+                     $ Full
+
+    mirror = renamed [Replace "Mirror Tiled"]
+                     $ mySpacing gap
+                     $ Mirror
+                     $ avoidStruts
+                     $ smartBorders
+                     $ tiled
+
+    floats = renamed [Replace "Floats"]
+                     $ mySpacing gap
+                     $ avoidStruts
+                     $ smartBorders
+                     $ limitWindows 20
+                     $ simplestFloat
+
+    tabs = renamed [Replace "Tabbed"]
+                     $ avoidStruts
+                     $ smartBorders
+                     $ myTabbedSpacing gap
+                     $ tabbed shrinkText myTabTheme
+
     -- The default number of windows in the master pane
     nmaster = 1
     -- Default proportion of screen occupied by master pane
@@ -226,24 +289,28 @@ myLayout
     -- Percent of screen to increment by when resizing panes
     delta   = 3/100
     -- Border space
-    i = 8
+    gap = 10
 
-myManageHook = composeAll
-    [
-      className =? "MPlayer"        --> doFloat
-    , className =? "Oblogout"        --> doFloat
-    -- , className =? "Gimp"           --> doFloat
-    , isDialog                      --> doFloat
-    , resource  =? "desktop_window" --> doIgnore
-    , resource  =? "desktop_window" --> doIgnore
-    , resource  =? "kdesktop"       --> doIgnore
-    ] <+> insertPosition Master Newer
+myManageHook =
+    manageSpawn
+    <+> insertPosition Master Newer
+      where
+        manageSpawn = composeAll
+          [ className =? "MPlayer"        --> doFloat
+          , className =? "Oblogout"        --> doFloat
+          -- , className =? "Gimp"           --> doFloat
+          , isDialog                      --> doFloat
+          , resource  =? "desktop_window" --> doIgnore
+          , resource  =? "desktop_window" --> doIgnore
+          , resource  =? "kdesktop"       --> doIgnore
+          , isDialog  --> doCenterFloat
+          ]
 
 myEventHook = swallowEventHook (className =? "kitty"  <||> className =? "Termite") (return True)
 
 myLogHook :: X ()
 myLogHook = fadeInactiveLogHook fadeAmount
-            where fadeAmount = 0.85
+            where fadeAmount = 1.0
 
 blue, lowWhite, magenta, red, white, yellow :: String
 magenta  = "#ff79c6"
@@ -278,22 +345,14 @@ myStartupHook = do
   -- spawnOnce "sleep 1; trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 2 --transparent true --tint 0x5f5f5f --height 30 &"
   -- spawnOnce "xscreensaver -no-splash &"
   spawnOnce "nm-applet --sm-disable &"
-  spawnOnce "~/.config/polybar/launch.sh --forest"
   spawnOnce "[[ -s ~/.Xmodmap ]] && xmodmap ~/.Xmodmap"
   spawnOnce "lxsession &"
   spawnOnce "xfce4-power-manager &"
   spawnOnce "picom &"
   spawnOnce "alttab -fg \"#d58681\" -bg \"#4a4a4a\" -frame \"#eb564d\" -t 128x150 -i 127x64 -w 1"
+  spawnOnce "~/.config/polybar/launch.sh --forest"
   spawnOnce "~/.config/conky/conky-startup.sh"
   spawnOnce "/usr/bin/emacs --daemon"
-
-xblue, xlowWhite, xmagenta, xred, xwhite, xyellow :: String -> String
-xmagenta  = xmobarColor magenta  ""
-xblue     = xmobarColor blue     ""
-xwhite    = xmobarColor white    ""
-xyellow   = xmobarColor yellow   ""
-xred      = xmobarColor red      ""
-xlowWhite = xmobarColor lowWhite ""
 
 main = do
   -- Connect to DBus

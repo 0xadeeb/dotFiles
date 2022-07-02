@@ -15,18 +15,15 @@
 (setq scroll-margin 3)
 (setq hscroll-margin 3)
 
-(setq doom-font (font-spec :family "monospace" :size 25 :weight 'semi-light)
-      doom-variable-pitch-font (font-spec :family "sans" :size 23))
+(setq doom-font (font-spec :family "JetBrains Mono" :size 25 :weight 'normal)
+      doom-variable-pitch-font (font-spec :family "JetBrains Mono" :size 23)
+      doom-big-font (font-spec :family "JetBrains Mono" :size 35 :weight 'normal))
 (after! doom-themes
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t))
 (custom-set-faces!
   '(font-lock-comment-face :slant italic)
   '(font-lock-keyword-face :slant italic))
-
-;; ℚ𝕎𝔼ℝ𝕋𝕐𝕌𝕀𝕆ℙ𝔸𝕊𝔻𝔽𝔾ℍ𝕁𝕂𝕃ℤ𝕏ℂ𝕍𝔹ℕ𝕄 -- Capital letters
-;; 𝕢𝕨𝕖𝕣𝕥𝕪𝕦𝕚𝕠𝕡𝕒𝕤𝕕𝕗𝕘𝕙𝕛𝕜𝕝𝕫𝕩𝕔𝕧𝕓𝕟𝕞 -- small letters
-;; 𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡𝟘 -- numbers
 
 (use-package fira-code-mode
   :config
@@ -181,8 +178,8 @@
   (pyvenv-mode 1))
 
 (plist-put! +ligatures-extra-symbols
-            :sum        "Σ"
-            :product    "Ⲡ"
+            :sum        "∑"
+            :product    "∏"
             )
 
 (after! haskell-mode
@@ -192,8 +189,8 @@
     :null          "()"
     :int           "Int"
     :float         "Double"
-    ;; :str           "String"
-    ;; :bool          "Bool"
+    :str           "String"
+    :bool          "Bool"
     :in            "`elem`"
     :not-in        "`notElem`"
     :union         "`union`"

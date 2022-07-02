@@ -124,6 +124,7 @@ alias eb='earbuds'
 alias brc='vim ~/.bashrc'
 alias prg='g++ -o test'
 alias ps='procs'
+alias yay='paru'
 
 #Add user's private bin to PATH
 if [ -d "$HOME/.local/bin" ] ; then
@@ -144,6 +145,7 @@ fi
 #Change to vim keybindings
 bindkey -v
 bindkey fj vi-cmd-mode
+#ZVM_VI_INSERT_ESCAPE_BINDKEY=fj
 
 # Search backwards and forwards with a pattern
 bindkey -M vicmd '/' history-incremental-pattern-search-backward

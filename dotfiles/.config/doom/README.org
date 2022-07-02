@@ -74,8 +74,8 @@ Emacs instance launched as a GUI app inherits a default minimal set of environme
 * Visual
 ** General Information
 + Doom exposes five (optional) variables for controlling fonts in Doom. Here are the three important ones:
-  - ~doom-font~
-  - ~doom-variable-pitch-font~
+  - ~doom-font~ -- Used mostly
+  - ~doom-variable-pitch-font~ -- Used in some extentions like eww browser
   - ~doom-big-font~ -- used for ~doom-big-font-mode~; use this for presentations or streaming.
 
 + They all accept either a font-spec, font string ("Input Mono-12"), or xlfd font string. You generally only need these two:
@@ -95,18 +95,15 @@ Emacs instance launched as a GUI app inherits a default minimal set of environme
 
 ** Font
 #+begin_src elisp
-(setq doom-font (font-spec :family "monospace" :size 25 :weight 'semi-light)
-      doom-variable-pitch-font (font-spec :family "sans" :size 23))
+(setq doom-font (font-spec :family "JetBrains Mono" :size 25 :weight 'normal)
+      doom-variable-pitch-font (font-spec :family "JetBrains Mono" :size 23)
+      doom-big-font (font-spec :family "JetBrains Mono" :size 35 :weight 'normal))
 (after! doom-themes
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t))
 (custom-set-faces!
   '(font-lock-comment-face :slant italic)
   '(font-lock-keyword-face :slant italic))
-
-;; ℚ𝕎𝔼ℝ𝕋𝕐𝕌𝕀𝕆ℙ𝔸𝕊𝔻𝔽𝔾ℍ𝕁𝕂𝕃ℤ𝕏ℂ𝕍𝔹ℕ𝕄 -- Capital letters
-;; 𝕢𝕨𝕖𝕣𝕥𝕪𝕦𝕚𝕠𝕡𝕒𝕤𝕕𝕗𝕘𝕙𝕛𝕜𝕝𝕫𝕩𝕔𝕧𝕓𝕟𝕞 -- small letters
-;; 𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡𝟘 -- numbers
 
 (use-package fira-code-mode
   :config
@@ -334,8 +331,8 @@ Configuring lsp-mode after loading, refer [[https://emacs-lsp.github.io/lsp-mode
 **** Setting up extra ligatures just for haskell
 #+begin_src elisp
 (plist-put! +ligatures-extra-symbols
-            :sum        "Σ"
-            :product    "Ⲡ"
+            :sum        "∑"
+            :product    "∏"
             )
 
 (after! haskell-mode
@@ -345,8 +342,8 @@ Configuring lsp-mode after loading, refer [[https://emacs-lsp.github.io/lsp-mode
     :null          "()"
     :int           "Int"
     :float         "Double"
-    ;; :str           "String"
-    ;; :bool          "Bool"
+    :str           "String"
+    :bool          "Bool"
     :in            "`elem`"
     :not-in        "`notElem`"
     :union         "`union`"

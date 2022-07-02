@@ -40,7 +40,7 @@ function send_notification {
             fi
         fi
     fi
-    bar=$(seq -s "─" $(($volume/5 + 1)) | sed 's/[0-9]//g')
+    bar=$(seq -s "─" $(($volume/4 + 1)) | sed 's/[0-9]//g')
     # Send the notification
     $DIR/$notify/notify-send.sh "$volume""     ""$bar" -i "$icon_name" -a "volumeControl" -t 2000  --replace=555
 

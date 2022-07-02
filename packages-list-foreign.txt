@@ -1,7 +1,10 @@
+alttab-git
 ani-cli
 ant-dracula-gtk-theme
 betterlockscreen-git
+blueman-git
 brave-bin
+earbuds
 nerd-fonts-mononoki
 oblogout-py3-git
 pacman-hook-list-installed-packages
