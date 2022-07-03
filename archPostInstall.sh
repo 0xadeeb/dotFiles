@@ -85,6 +85,15 @@ function setupZsh() {
 	[ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ] && git clone https://github.com/zsh-users/zsh-autosuggestions.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 }
 
+function installDoomEmacs() {
+	echo "Installing doom emacs..."
+	sleep 2
+	sudo pacman -S --nocomfirm --needed git emacs ripgrep find fd
+	git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.emacs.d
+	~/.emacs.d/bin/doom install
+	~/.emacs.d/bin/doom sync
+}
+
 function main() {
 	clear
 	echo "Welcome!" && sleep 1
@@ -111,6 +120,8 @@ function main() {
 	installForeignPackages $cfg $helper
 
 	simlinkDotfiles $cfg
+
+#	installDoomEmacs
 
 	installXmonad
 
