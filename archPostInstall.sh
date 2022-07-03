@@ -53,6 +53,12 @@ function installXmonad () {
 	echo "Installing xmonad as the window manager..."
 	sleep 2
 	cd ~/.config/xmonad
+	if [ -d "$HOME/.local/bin" ] ; then
+		PATH="$HOME/.local/bin:$PATH"
+	else
+		mkdir -p ~/.local/bin
+		PATH="$HOME/.local/bin:$PATH"
+	fi
 	sudo pacman -S --noconfirm --needed stack
 	stack upgrade
 	[ -f "stack.yaml" ] && rm stack.yaml
@@ -69,8 +75,10 @@ function setupZsh() {
 	sudo pacman -S --noconfirm --needed curl wget
 	if [ ! -d "$HOME/.oh-my-zsh" ]
 	then
-		sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+		mv ~/.zshrc ~/.zshrc.pre-oh-my-zsh
+		sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 		mv ~/.zshrc.pre-oh-my-zsh ~/.zshrc
+		chsh -s $(type -a zsh | cut -d ' ' -f 3)
 	fi
 
 	[ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ] && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
@@ -117,7 +125,7 @@ function main() {
 
 	clear
 	echo "Installation process done!"
-	echo "Enjoy your new setup ;-)"
+	echo "Logout and login to enjoy your new setup ;-)"
 	sleep 2
 }
 
