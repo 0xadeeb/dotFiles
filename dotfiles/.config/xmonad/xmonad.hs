@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+
 -- Basic imports
 import XMonad
 import System.Exit
@@ -28,6 +31,7 @@ import XMonad.Util.SpawnOnce
 import XMonad.Util.Run
 import XMonad.Util.Loggers
 import XMonad.Util.EZConfig (additionalKeysP)
+import XMonad.Util.Types ( Direction2D(U, D, L, R) )
 
 -- Layouts
 import XMonad.Layout.Grid
@@ -38,8 +42,10 @@ import XMonad.Layout.Tabbed
 
 -- Layout modifiers
 import XMonad.Layout.Decoration
+-- import XMonad.Layout.IfMax
 import XMonad.Layout.LayoutModifier
 import XMonad.Layout.LimitWindows (limitWindows, increaseLimit, decreaseLimit)
+-- import XMonad.Layout.NoFrillsDecoration
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Renamed
 import XMonad.Layout.Spacing
@@ -90,6 +96,20 @@ myEmacs = "emacsclient -c -a 'emacs' "
 myXmobar = "~/.config/xmonad/xmobar.hs"
 myBar = myXmobar
 myWallpapers = "~/.wallpapers"
+topbar = 15
+
+topBarTheme = def
+    {
+     inactiveBorderColor   = base03
+    , inactiveColor         = base03
+    , inactiveTextColor     = base03
+    , activeBorderColor     = active
+    , activeColor           = active
+    , activeTextColor       = active
+    , urgentBorderColor     = red
+    , urgentTextColor       = yellow
+    , decoHeight            = topbar
+    }
 
 myKeys :: [(String , X ())]
 myKeys =
@@ -223,65 +243,108 @@ myMouseBindings XConfig {XMonad.modMask = modm} = M.fromList
 mySpacing :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
 mySpacing i = spacingRaw False (Border i i i i) True (Border i i i i) True
 
+mySpacing' :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
+mySpacing' i = spacingRaw False (Border i (2 * i) i i) True (Border 0 0 i i) True
+
 myTabbedSpacing :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
-myTabbedSpacing i = spacingRaw False (Border 0 i i i) True (Border 0 i i i) True
+myTabbedSpacing i = spacingRaw False (Border i i (2 * i) (2 * i)) True (Border 0 0 0 0) True
+
+newtype SmartBarDeco a = SmartBarDeco Direction2D
+  deriving (Eq, Show, Read)
+
+instance Eq a => DecorationStyle SmartBarDeco a where
+  shrink (SmartBarDeco direction) = shrinkWinForDeco direction
+   where
+    shrinkWinForDeco :: Direction2D -> Rectangle -> Rectangle -> Rectangle
+    shrinkWinForDeco U (Rectangle _ _ _ dh) (Rectangle x y w h) = Rectangle x (y + fi dh) w (h - fi dh)
+    shrinkWinForDeco D (Rectangle _ _ _ dh) (Rectangle x y w h) = Rectangle x y w (h - fi dh)
+    shrinkWinForDeco L (Rectangle _ _ dw _) (Rectangle x y w h) = Rectangle (x + fi dw) y (w - fi dw) h
+    shrinkWinForDeco R (Rectangle _ _ dw _) (Rectangle x y w h) = Rectangle x y (w - fi dw) h
+
+  pureDecoration (SmartBarDeco direction) decoWidth decoHeight _ _ windowRects currentWin@(_win, Rectangle x y w h)
+    | length windowRects >= 2
+    = Just smartBarBar
+    | otherwise
+    = Nothing
+   where
+    smartBarBar = case direction of
+      U -> Rectangle x y w decoHeight
+      D -> Rectangle x (y + fi (h - decoHeight)) w decoHeight
+      L -> Rectangle x y decoWidth h
+      R -> Rectangle (x + fi (w - decoWidth)) y decoWidth h
+
+smartBarDeco
+  :: Eq a
+  => Direction2D
+  -> Theme
+  -> l a
+  -> ModifiedLayout (Decoration SmartBarDeco DefaultShrinker) l a
+smartBarDeco direction theme =
+  decoration shrinkText theme (SmartBarDeco direction)
 
 myLayout
   = tiled
     ||| grid
-    ||| floats
+    ||| float
     ||| magnifiedTiled
     ||| mirror
     ||| full
     ||| tabs
   where
-    tiled = renamed [Replace "Tiled"]
-                     $ mySpacing gap
-                     $ avoidStruts
-                     $ smartBorders
-                     $ Tall nmaster delta ratio
+    tiled             = renamed [Replace "tiled"]
+                            $ addTopBar
+                            $ mySpacing gap
+                            $ avoidStruts
+                            $ noBorders
+                            $ smartBorders
+                            $ Tall nmaster delta ratio
 
-    magnifiedTiled = renamed [Replace "Magnified"]
-                     $ mySpacing gap
-                     $ avoidStruts
-                     $ smartBorders
-                     $ Mag.magnifiercz' 1.1
-                     $ Tall nmaster delta ratio
+    magnifiedTiled    = renamed [Replace "Magnified"]
+                            $ mySpacing gap
+                            $ avoidStruts
+                            $ smartBorders
+                            $ Mag.magnifiercz' 1.1
+                            $ Tall nmaster delta ratio
 
-    grid = renamed [Replace "Grid"]
-                     $ mySpacing gap
-                     $ avoidStruts
-                     $ smartBorders
-                     $ limitWindows 12
-                     $ Grid
+    grid              = renamed [Replace "Grid"]
+                            $ addTopBar
+                            $ mySpacing gap
+                            $ avoidStruts
+                            $ smartBorders
+                            $ limitWindows 12
+                            $ Grid
 
-    full = renamed [CutWordsLeft 1]
-                     $ mySpacing gap
-                     $ avoidStruts
-                     $ smartBorders
-                     $ noBorders
-                     $ Full
+    full              = renamed [CutWordsLeft 1]
+                            $ mySpacing gap
+                            $ avoidStruts
+                            $ smartBorders
+                            $ noBorders
+                            $ Full
 
-    mirror = renamed [Replace "Mirror Tiled"]
-                     $ mySpacing gap
-                     $ Mirror
-                     $ avoidStruts
-                     $ smartBorders
-                     $ tiled
+    mirror            = renamed [Replace "Mirror Tiled"]
+                            $ addTopBar
+                            $ mySpacing gap
+                            $ avoidStruts
+                            $ smartBorders
+                            $ Mirror
+                            $ tiled
 
-    floats = renamed [Replace "Floats"]
-                     $ mySpacing gap
-                     $ avoidStruts
-                     $ smartBorders
-                     $ limitWindows 20
-                     $ simplestFloat
+    float             = renamed [Replace "Float"]
+                            $ mySpacing gap
+                            $ addTopBar
+                            $ avoidStruts
+                            $ smartBorders
+                            $ limitWindows 20
+                            $ simplestFloat
 
-    tabs = renamed [Replace "Tabbed"]
-                     $ avoidStruts
-                     $ smartBorders
-                     $ myTabbedSpacing gap
-                     $ tabbed shrinkText myTabTheme
+    tabs              = renamed [Replace "Tabbed"]
+                            $ avoidStruts
+                            $ smartBorders
+                            $ myTabbedSpacing gap
+                            $ tabbed shrinkText myTabTheme
 
+
+    addTopBar =  smartBarDeco U topBarTheme
     -- The default number of windows in the master pane
     nmaster = 1
     -- Default proportion of screen occupied by master pane
