@@ -12,6 +12,7 @@ paru
 picom-jonaburg-git
 polkit-dumb-agent-git
 polkit-explorer-git
+sddm-theme-astronaut
 snap-pac-grub
 snapper-gui-git
 snapper-rollback

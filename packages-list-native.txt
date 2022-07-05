@@ -4,6 +4,7 @@ autoconf
 automake
 base
 bash-completion
+bat
 bison
 bluez
 bluez-utils
@@ -19,6 +20,7 @@ exa
 fakeroot
 fd
 feh
+flameshot
 flex
 fzf
 gcc
@@ -143,6 +145,7 @@ xorg-xwd
 xorg-xwininfo
 xorg-xwud
 zathura
+zathura-pdf-poppler
 zoxide
 zsh
 zsh-completions

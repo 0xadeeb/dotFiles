@@ -448,18 +448,18 @@ Basic set up for dashboard
 
 * FlySpell
 Spell checker for text mode buffers
-#+begin_src elisp
-;; (use-package flyspell
-;;   :ensure nil
-;;   :defer t
-;;   :if (executable-find "aspell")
-;;   :hook (((text-mode outline-mode latex-mode org-mode markdown-mode) . flyspell-mode))
-;;   :custom
-;;   (flyspell-issue-message-flag nil)
-;;   (ispell-program-name "aspell")
-;;   (ispell-extra-args
-;;    '("--sug-mode=ultra" "--lang=en_US" "--camel-case"))
-;;   )
+#+begin_src elisp :tangle no
+(use-package flyspell
+  :ensure nil
+  :defer t
+  :if (executable-find "aspell")
+  :hook (((text-mode outline-mode latex-mode org-mode markdown-mode) . flyspell-mode))
+  :custom
+  (flyspell-issue-message-flag nil)
+  (ispell-program-name "aspell")
+  (ispell-extra-args
+   '("--sug-mode=ultra" "--lang=en_US" "--camel-case"))
+  )
 (remove-hook 'org-mode-hook #'flyspell-mode)
 #+end_src
 

@@ -268,19 +268,6 @@
 (add-to-list 'recentf-exclude "/.emacs.d/.local/etc/workspaces/autosave") ;;hide recent files from recentf
 (add-to-list 'projectile-ignored-projects "*.emacs.d")                 ;;hide emacs.d dir from projectile projects
 
-;; (use-package flyspell
-;;   :ensure nil
-;;   :defer t
-;;   :if (executable-find "aspell")
-;;   :hook (((text-mode outline-mode latex-mode org-mode markdown-mode) . flyspell-mode))
-;;   :custom
-;;   (flyspell-issue-message-flag nil)
-;;   (ispell-program-name "aspell")
-;;   (ispell-extra-args
-;;    '("--sug-mode=ultra" "--lang=en_US" "--camel-case"))
-;;   )
-(remove-hook 'org-mode-hook #'flyspell-mode)
-
 (if (daemonp)
     (message "Loading emacs as a client!")
     (message "Loading regular emacs"))

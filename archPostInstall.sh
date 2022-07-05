@@ -66,6 +66,21 @@ function installXmonad () {
 	stack install
 	sudo ln -s $HOME/.local/bin/{xmonad,xmonad-dbus} /usr/bin
 	xmonad --recompile
+
+	echo "Setting up sddm as the login manager..."
+
+	[ ! -d "/usr/share/xsessions" ] && sudo mkdir -p /usr/share/xsessions
+	sudo cp $1/desktop/xmonad.desktop /usr/share/xsessions
+
+	sudo pacman -S --noconfirm --needed sddm
+	sudo systemctl enable sddm
+
+	$2 -S --noconfirm --needed sddm-theme-astronaut
+
+	echo "[Theme]" >> $1/sddm.conf
+	echo "Current=astronaut" >> $1/sddm.conf
+	sudo mv $1/sddm.conf /etc/sddm.conf
+
 }
 
 function setupZsh() {
@@ -121,9 +136,9 @@ function main() {
 
 	simlinkDotfiles $cfg
 
-#	installDoomEmacs
+	installDoomEmacs
 
-	installXmonad
+	installXmonad $cfg $helper
 
 	clear
 	echo "Do you want to use Zsh as your default shell?"
@@ -136,7 +151,7 @@ function main() {
 
 	clear
 	echo "Installation process done!"
-	echo "Logout and login to enjoy your new setup ;-)"
+	echo "Restart to enjoy your new setup ;-)"
 	sleep 2
 }
 

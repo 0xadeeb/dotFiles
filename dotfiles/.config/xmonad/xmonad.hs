@@ -38,18 +38,21 @@ import XMonad.Layout.Grid
 import XMonad.Layout.LayoutCombinators
 import qualified XMonad.Layout.Magnifier as Mag
 import XMonad.Layout.SimplestFloat
+import XMonad.Layout.Spiral
+import XMonad.Layout.SubLayouts
 import XMonad.Layout.Tabbed
 
 -- Layout modifiers
 import XMonad.Layout.Decoration
--- import XMonad.Layout.IfMax
+import XMonad.Layout.WindowNavigation
 import XMonad.Layout.LayoutModifier
 import XMonad.Layout.LimitWindows (limitWindows, increaseLimit, decreaseLimit)
--- import XMonad.Layout.NoFrillsDecoration
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Renamed
 import XMonad.Layout.Spacing
 import XMonad.Layout.TabBarDecoration
+-- import XMonad.Layout.IfMax
+-- import XMonad.Layout.NoFrillsDecoration
 
 -- For polybar
 import qualified XMonad.DBus as D
@@ -97,6 +100,7 @@ myXmobar = "~/.config/xmonad/xmobar.hs"
 myBar = myXmobar
 myWallpapers = "~/.wallpapers"
 topbar = 15
+myBrowserClass = "Brave-browser"
 
 topBarTheme = def
     {
@@ -143,6 +147,17 @@ myKeys =
     -- Move focus to the next window
     , ("M-<Tab>", windows W.focusDown)
 
+    , ("M-C-h", sendMessage $ pullGroup L)
+    , ("M-C-l", sendMessage $ pullGroup R)
+    , ("M-C-k", sendMessage $ pullGroup U)
+    , ("M-C-j", sendMessage $ pullGroup D)
+
+    , ("M-C-m", withFocused (sendMessage . MergeAll))
+    , ("M-C-u", withFocused (sendMessage . UnMerge))
+
+    , ("M-C-.", onGroup W.focusUp')
+    , ("M-C-,", onGroup W.focusDown')
+
     -- Move focus to the next window
     , ("M-j", windows W.focusDown)
 
@@ -179,8 +194,10 @@ myKeys =
     -- Toggle the status bar gap
     -- Use this binding with avoidStruts from Hooks.ManageDocks.
     -- See also the statusBar function from Hooks.DynamicLog.
-
     , ("M-S-b", sendMessage ToggleStruts)
+
+    -- set wallpaper
+    , ("M-b", spawn $ "feh --randomize --bg-scale " ++ myWallpapers ++ "/*")
 
     -- Quit xmonad
     , ("M-S-q", io (exitWith ExitSuccess))
@@ -211,6 +228,9 @@ myKeys =
 
     -- Mute and unmute
     , ("<XF86AudioMute>", spawn "~/.config/dunst/volume/volume.sh toggle")
+
+    -- Screenshot
+    , ("<Print>", spawn "flameshot full")
 
     -- No borders
     --, ("M-S-n" SendMessage )
@@ -290,11 +310,14 @@ myLayout
     ||| mirror
     ||| full
     ||| tabs
+    ||| spiral1
   where
-    tiled             = renamed [Replace "tiled"]
-                            $ addTopBar
-                            $ mySpacing gap
+    tiled             = renamed [Replace "Tiled"]
                             $ avoidStruts
+                            $ addTopBar
+                            -- $ windowNavigation
+                            -- $ subLayout [] (tabs)
+                            $ mySpacing gap
                             $ noBorders
                             $ smartBorders
                             $ Tall nmaster delta ratio
@@ -310,11 +333,10 @@ myLayout
                             $ addTopBar
                             $ mySpacing gap
                             $ avoidStruts
-                            $ smartBorders
                             $ limitWindows 12
                             $ Grid
 
-    full              = renamed [CutWordsLeft 1]
+    full              = renamed [Replace "Full"]
                             $ mySpacing gap
                             $ avoidStruts
                             $ smartBorders
@@ -325,13 +347,11 @@ myLayout
                             $ addTopBar
                             $ mySpacing gap
                             $ avoidStruts
-                            $ smartBorders
                             $ Mirror
-                            $ tiled
+                            $ Tall nmaster delta ratio
 
     float             = renamed [Replace "Float"]
                             $ mySpacing gap
-                            $ addTopBar
                             $ avoidStruts
                             $ smartBorders
                             $ limitWindows 20
@@ -339,9 +359,15 @@ myLayout
 
     tabs              = renamed [Replace "Tabbed"]
                             $ avoidStruts
-                            $ smartBorders
                             $ myTabbedSpacing gap
                             $ tabbed shrinkText myTabTheme
+
+    spiral1            = renamed [Replace "Spiral"]
+                            $ addTopBar
+                            $ mySpacing gap
+                            $ avoidStruts
+                            $ limitWindows 12
+                            $ spiral (6/7)
 
 
     addTopBar =  smartBarDeco U topBarTheme
@@ -358,16 +384,33 @@ myManageHook =
     manageSpawn
     <+> insertPosition Master Newer
       where
-        manageSpawn = composeAll
-          [ className =? "MPlayer"        --> doFloat
-          , className =? "Oblogout"        --> doFloat
-          -- , className =? "Gimp"           --> doFloat
-          , isDialog                      --> doFloat
-          , resource  =? "desktop_window" --> doIgnore
-          , resource  =? "desktop_window" --> doIgnore
-          , resource  =? "kdesktop"       --> doIgnore
-          , isDialog  --> doCenterFloat
+        manageSpawn = composeOne
+          [ className =? "mpv"            -?> doFloat
+          , className =? "Oblogout"       -?> doFloat
+          , isDialog                      -?> doCenterFloat
+          , resource  =? "desktop_window" -?> doIgnore
+          , isDialog  -?> doCenterFloat
+          , isBrowserDialog -?> forceCenterFloat
+          , isRole =? gtkFile  -?> forceCenterFloat
+          , isRole =? "pop-up" -?> doCenterFloat
+          , isInProperty "_NET_WM_WINDOW_TYPE"
+                         "_NET_WM_WINDOW_TYPE_SPLASH" -?> doCenterFloat
           ]
+        isBrowserDialog = isDialog <&&> className =? myBrowserClass
+        gtkFile = "GtkFileChooserDialog"
+        isRole = stringProperty "WM_WINDOW_ROLE"
+
+forceCenterFloat :: ManageHook
+forceCenterFloat = doFloatDep move
+  where
+    move :: W.RationalRect -> W.RationalRect
+    move _ = W.RationalRect x y w h
+
+    w, h, x, y :: Rational
+    w = 1/3
+    h = 1/2
+    x = (1-w)/2
+    y = (1-h)/2
 
 myEventHook = swallowEventHook (className =? "kitty"  <||> className =? "Termite") (return True)
 
@@ -403,11 +446,11 @@ myAddSpaces len str = sstr ++ replicate (len - length sstr) ' '
 myStartupHook :: X ()
 myStartupHook = do
   -- spawn $ "wal -i " ++ myWallpapers -- pywal sets random wallpaper
-  spawn $ "feh --randomize --bg-scale " ++ myWallpapers ++ "/*"  -- set wallpaper
+  spawnOnce $ "feh --randomize --bg-scale " ++ myWallpapers ++ "/*"  -- set wallpaper
   spawnOnce "xsetroot -cursor_name left_ptr"
-  -- spawnOnce "sleep 1; trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 2 --transparent true --tint 0x5f5f5f --height 30 &"
   -- spawnOnce "xscreensaver -no-splash &"
   spawnOnce "nm-applet --sm-disable &"
+  spawnOnce "flameshot &"
   spawnOnce "[[ -s ~/.Xmodmap ]] && xmodmap ~/.Xmodmap"
   spawnOnce "lxsession &"
   spawnOnce "xfce4-power-manager &"
