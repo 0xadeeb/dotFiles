@@ -38,7 +38,7 @@ linux-firmware
 linux-headers
 lsb-release
 lxappearance
-lxsession
+lxqt-policykit
 m4
 make
 mcfly

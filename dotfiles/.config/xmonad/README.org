@@ -598,7 +598,7 @@ myStartupHook = do
   spawnOnce "nm-applet --sm-disable &"
   spawnOnce "flameshot &"
   spawnOnce "[[ -s ~/.Xmodmap ]] && xmodmap ~/.Xmodmap"
-  spawnOnce "lxsession &"
+  spawnOnce "/usr/bin/lxqt-policykit-agent &"
   spawnOnce "xfce4-power-manager &"
   spawnOnce "picom &"
   spawnOnce "alttab -fg \"#d58681\" -bg \"#4a4a4a\" -frame \"#eb564d\" -t 128x150 -i 127x64 -w 1"
