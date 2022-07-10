@@ -149,6 +149,7 @@ myKeys =
     -- Move focus to the next window
     , ("M-<Tab>", windows W.focusDown)
 
+    -- Merging windows to subLayout groups
     , ("M-C-h", sendMessage $ pullGroup L)
     , ("M-C-l", sendMessage $ pullGroup R)
     , ("M-C-k", sendMessage $ pullGroup U)
@@ -209,6 +210,8 @@ myKeys =
 
     -- Open emacs
     , ("M-e e", spawn $ myEmacs ++ "-e '(dashboard-refresh-buffer)'")
+    -- Restart emacs server
+    , ("M-e r", spawn  "killall emacs && emacs --daemon")
 
     -- Lock screen
     , ("M-S-l", spawn  "betterlockscreen -l")

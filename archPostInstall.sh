@@ -1,6 +1,12 @@
 #!/bin/bash
 
+function getAbsFilename() {
+  # $1 : relative filename
+  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+}
+
 function installAurHelper() {
+	clear
 	if ! command -v $1 &> /dev/null
 	then
 		echo "Installing $1..."
@@ -8,7 +14,7 @@ function installAurHelper() {
 		sleep 2
 		[ ! -d "$HOME/Downloads" ] && mkdir ~/Downloads
 		cd ~/Downloads
-		if [ $1 -eq "paru" ]
+		if [ "$1" == "paru" ]
 		then
 			sudo pacman -S --noconfirm --needed rust
 		fi
@@ -84,6 +90,7 @@ function installXmonad () {
 }
 
 function setupZsh() {
+	clear
 	echo "Setting up Zsh..."
 	sleep 2
 	sudo pacman -S --noconfirm --needed zsh zsh-completions
@@ -101,9 +108,10 @@ function setupZsh() {
 }
 
 function installDoomEmacs() {
+	clear
 	echo "Installing doom emacs..."
 	sleep 2
-	sudo pacman -S --nocomfirm --needed git emacs ripgrep find fd
+	sudo pacman -S --noconfirm --needed git emacs ripgrep fd
 	git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.emacs.d
 	~/.emacs.d/bin/doom install
 	~/.emacs.d/bin/doom sync
@@ -112,41 +120,66 @@ function installDoomEmacs() {
 function main() {
 	clear
 	echo "Welcome!" && sleep 1
-	cfg=$(pwd)
+	cfg=`dirname $(getAbsFilename "$0")`
 	helper="paru"
+	xmonadOpt="y"
+	zshOpt="y"
+	doomOpt="y"
 
-	echo "Doing a system update..."
-	sudo pacman --noconfirm -Syu
+	echo "Would you like to install xmonad"
+	read -r -p ":: [Y/n] " opt
+	if [[ ( ! -z "$opt" ) && ( "$opt" -eq "n" || "$opt" -eq "N" ) ]]
+	then
+	   xmonadOpt="n"
+	fi
 
-	clear
+	echo "Would you like to change default shell to zsh"
+	read -r -p ":: [Y/n] " opt
+	if [[ ( ! -z "$opt" ) && ( "$opt" -eq "n" || "$opt" -eq "N" ) ]]
+	then
+	   zshOpt="n"
+	fi
+
+	echo "Would you like to install doom emacs"
+	read -r -p ":: [Y/n] " opt
+	if [[ ( ! -z "$opt" ) && ( "$opt" -eq "n" || "$opt" -eq "N" ) ]]
+	then
+	   doomOpt="n"
+	fi
+
 	echo "Which AUR helper would you like to install?"
 	echo "1) paru 2)yay"
-	read -r -p "Default is paru(1): " num
+	read -r -p "Default is paru(1): " opt
 
-	if [ ! -z "$num" ] && [ $num -eq 2 ]
+	if [ ! -z "$opt" ] && [ $opt -eq 2 ]
 	then
 		helper="yay"
 	fi
 
-	installAurHelper $helper
+	clear
+	echo "Doing a system update..."
+	sudo pacman --noconfirm -Syu
 
 	installNativePackages $cfg
 
+	installAurHelper $helper
 	installForeignPackages $cfg $helper
 
 	simlinkDotfiles $cfg
 
-	installDoomEmacs
+	if [ "$xmonadOpt" -eq "y"  ]
+	then
+		installXmonad $cfg $helper
+	fi
 
-	installXmonad $cfg $helper
-
-	clear
-	echo "Do you want to use Zsh as your default shell?"
-	read -r -p ":: [Y/n] " opt
-
-	if [ "$opt" != "n" ] && [ "$opt" != "N" ]
+	if [ "$zshOpt" != "y" ]
 	then
 		setupZsh
+	fi
+
+	if [ "$doomOpt" -eq "y"  ]
+	then
+		installDoomEmacs
 	fi
 
 	clear

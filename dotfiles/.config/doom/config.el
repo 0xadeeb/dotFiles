@@ -15,9 +15,9 @@
 (setq scroll-margin 3)
 (setq hscroll-margin 3)
 
-(setq doom-font (font-spec :family "JetBrains Mono" :size 25 :weight 'normal)
-      doom-variable-pitch-font (font-spec :family "JetBrains Mono" :size 23)
-      doom-big-font (font-spec :family "JetBrains Mono" :size 35 :weight 'normal))
+(setq doom-font (font-spec :family "Source Code Pro" :size 25 :weight 'normal)
+      doom-variable-pitch-font (font-spec :family "Source Code Pro" :size 23)
+      doom-big-font (font-spec :family "Source Code Pro" :size 35 :weight 'normal))
 (after! doom-themes
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t))
@@ -41,7 +41,7 @@
   )             ;; Icons for dired
 (setq doom-themes-treemacs-theme "doom-colors")
 (setq +ligatures-extras-in-modes '(haskell-mode org-mode))
-(set-scroll-bar-mode 'right)
+;; (set-scroll-bar-mode 'right)
 
 (use-package highlight-indent-guides
   :ensure t
@@ -55,7 +55,7 @@
 
 (setq org-directory "~/org/")
 (map! :leader
-      :desc "Org babel tangle" "m B" #'org-babel-tangle)
+      :desc "Org babel tangle" "m v" #'org-babel-tangle)
 (after! org
   (setq
         org-pretty-entities t
@@ -95,7 +95,7 @@
 
 (global-set-key (kbd "<backtab>") 'un-indent-by-removing-4-spaces)
 (defun un-indent-by-removing-4-spaces ()
-  "remove 4 spaces from beginning of of line"
+  "remove 4 spaces or a tab from beginning of of line"
   (interactive)
   (save-excursion
     (save-match-data
@@ -271,5 +271,9 @@
 (if (daemonp)
     (message "Loading emacs as a client!")
     (message "Loading regular emacs"))
+
+(use-package rainbow-mode
+  :hook prog-mode org-mode ;; Enables rainbow-mode automatically for programming and org major modes
+)
 
 (beacon-mode 1)

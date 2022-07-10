@@ -36,6 +36,7 @@
 - [[#configuration-of-emacs-daemon][Configuration of emacs daemon]]
   - [[#check-if-current-session-is-daemon-session][Check if current session is daemon session]]
 - [[#extra-hacks][Extra hacks]]
+  - [[#rainbow-mode][Rainbow mode]]
   - [[#beacon][Beacon]]
 
 * Instructions
@@ -95,9 +96,9 @@ Emacs instance launched as a GUI app inherits a default minimal set of environme
 
 ** Font
 #+begin_src elisp
-(setq doom-font (font-spec :family "JetBrains Mono" :size 25 :weight 'normal)
-      doom-variable-pitch-font (font-spec :family "JetBrains Mono" :size 23)
-      doom-big-font (font-spec :family "JetBrains Mono" :size 35 :weight 'normal))
+(setq doom-font (font-spec :family "Source Code Pro" :size 25 :weight 'normal)
+      doom-variable-pitch-font (font-spec :family "Source Code Pro" :size 23)
+      doom-big-font (font-spec :family "Source Code Pro" :size 35 :weight 'normal))
 (after! doom-themes
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t))
@@ -124,7 +125,7 @@ Emacs instance launched as a GUI app inherits a default minimal set of environme
   )             ;; Icons for dired
 (setq doom-themes-treemacs-theme "doom-colors")
 (setq +ligatures-extras-in-modes '(haskell-mode org-mode))
-(set-scroll-bar-mode 'right)
+;; (set-scroll-bar-mode 'right)
 #+end_src
 
 ** Configure Indentation
@@ -145,7 +146,7 @@ Emacs instance launched as a GUI app inherits a default minimal set of environme
 #+begin_src elisp
 (setq org-directory "~/org/")
 (map! :leader
-      :desc "Org babel tangle" "m B" #'org-babel-tangle)
+      :desc "Org babel tangle" "m v" #'org-babel-tangle)
 (after! org
   (setq
         org-pretty-entities t
@@ -157,7 +158,6 @@ Emacs instance launched as a GUI app inherits a default minimal set of environme
         org-hide-emphasis-markers t
         )
   )
-
 #+end_src
 
 * Remap Keys
@@ -213,7 +213,7 @@ Use ~SPC w c~ and then the following keys
 #+begin_src elisp
 (global-set-key (kbd "<backtab>") 'un-indent-by-removing-4-spaces)
 (defun un-indent-by-removing-4-spaces ()
-  "remove 4 spaces from beginning of of line"
+  "remove 4 spaces or a tab from beginning of of line"
   (interactive)
   (save-excursion
     (save-match-data
@@ -373,7 +373,6 @@ Configuring lsp-mode after loading, refer [[https://emacs-lsp.github.io/lsp-mode
                (cons (concat "^" (expand-file-name "~/code/") ".+\\.cpp\\'")
                      (expand-file-name "~/code/template.cpp")))
  )
-
 #+end_src
 
 * Shells
@@ -472,6 +471,12 @@ Spell checker for text mode buffers
 #+end_src
 
 * Extra hacks
+** Rainbow mode
+#+begin_src emacs-lisp
+(use-package rainbow-mode
+  :hook prog-mode org-mode ;; Enables rainbow-mode automatically for programming and org major modes
+)
+#+end_src
 ** Beacon
 #+begin_src emacs-lisp
 (beacon-mode 1)
