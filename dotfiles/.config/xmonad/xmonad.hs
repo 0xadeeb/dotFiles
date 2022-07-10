@@ -37,6 +37,7 @@ import XMonad.Util.Types ( Direction2D(U, D, L, R) )
 import XMonad.Layout.Grid
 import XMonad.Layout.LayoutCombinators
 import qualified XMonad.Layout.Magnifier as Mag
+import XMonad.Layout.Simplest
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.Spiral
 import XMonad.Layout.SubLayouts
@@ -44,6 +45,7 @@ import XMonad.Layout.Tabbed
 
 -- Layout modifiers
 import XMonad.Layout.Decoration
+import XMonad.Layout.Groups
 import XMonad.Layout.WindowNavigation
 import XMonad.Layout.LayoutModifier
 import XMonad.Layout.LimitWindows (limitWindows, increaseLimit, decreaseLimit)
@@ -273,6 +275,8 @@ newtype SmartBarDeco a = SmartBarDeco Direction2D
   deriving (Eq, Show, Read)
 
 instance Eq a => DecorationStyle SmartBarDeco a where
+  describeDeco _ = "SmartDeco"
+
   shrink (SmartBarDeco direction) = shrinkWinForDeco direction
    where
     shrinkWinForDeco :: Direction2D -> Rectangle -> Rectangle -> Rectangle
@@ -281,11 +285,9 @@ instance Eq a => DecorationStyle SmartBarDeco a where
     shrinkWinForDeco L (Rectangle _ _ dw _) (Rectangle x y w h) = Rectangle (x + fi dw) y (w - fi dw) h
     shrinkWinForDeco R (Rectangle _ _ dw _) (Rectangle x y w h) = Rectangle x y (w - fi dw) h
 
-  pureDecoration (SmartBarDeco direction) decoWidth decoHeight _ _ windowRects currentWin@(_win, Rectangle x y w h)
-    | length windowRects >= 2
-    = Just smartBarBar
-    | otherwise
-    = Nothing
+  pureDecoration (SmartBarDeco direction) decoWidth decoHeight _ s windowRects currentWin@(_win, Rectangle x y w h)
+    | (isInStack s _win) && (decoHeight < h) && (length windowRects > 1) = Just smartBarBar
+    | otherwise = Nothing
    where
     smartBarBar = case direction of
       U -> Rectangle x y w decoHeight
@@ -300,12 +302,12 @@ smartBarDeco
   -> l a
   -> ModifiedLayout (Decoration SmartBarDeco DefaultShrinker) l a
 smartBarDeco direction theme =
-  decoration shrinkText theme (SmartBarDeco direction)
+  decoration shrinkText theme $ SmartBarDeco direction
 
 myLayout
   = tiled
     ||| grid
-    ||| float
+    ||| floats
     ||| magnifiedTiled
     ||| mirror
     ||| full
@@ -313,24 +315,34 @@ myLayout
     ||| spiral1
   where
     tiled             = renamed [Replace "Tiled"]
-                            $ avoidStruts
                             $ addTopBar
-                            -- $ windowNavigation
-                            -- $ subLayout [] (tabs)
+                            $ windowNavigation
+                            $ addTabs shrinkText myTabTheme
+                            $ subLayout [] Simplest
+                            $ avoidStruts
                             $ mySpacing gap
                             $ noBorders
                             $ smartBorders
                             $ Tall nmaster delta ratio
 
     magnifiedTiled    = renamed [Replace "Magnified"]
+                            $ addTopBar
+                            $ windowNavigation
+                            $ addTabs shrinkText myTabTheme
+                            $ subLayout [] Simplest
                             $ mySpacing gap
                             $ avoidStruts
                             $ smartBorders
                             $ Mag.magnifiercz' 1.1
+                            $ noBorders
+                            $ smartBorders
                             $ Tall nmaster delta ratio
 
     grid              = renamed [Replace "Grid"]
                             $ addTopBar
+                            $ windowNavigation
+                            $ addTabs shrinkText myTabTheme
+                            $ subLayout [] Simplest
                             $ mySpacing gap
                             $ avoidStruts
                             $ limitWindows 12
@@ -345,12 +357,15 @@ myLayout
 
     mirror            = renamed [Replace "Mirror Tiled"]
                             $ addTopBar
+                            $ windowNavigation
+                            $ addTabs shrinkText myTabTheme
+                            $ subLayout [] Simplest
                             $ mySpacing gap
                             $ avoidStruts
                             $ Mirror
                             $ Tall nmaster delta ratio
 
-    float             = renamed [Replace "Float"]
+    floats             = renamed [Replace "Float"]
                             $ mySpacing gap
                             $ avoidStruts
                             $ smartBorders
@@ -364,13 +379,15 @@ myLayout
 
     spiral1            = renamed [Replace "Spiral"]
                             $ addTopBar
+                            $ windowNavigation
+                            $ addTabs shrinkText myTabTheme
+                            $ subLayout [] Simplest
                             $ mySpacing gap
                             $ avoidStruts
                             $ limitWindows 12
                             $ spiral (6/7)
 
-
-    addTopBar =  smartBarDeco U topBarTheme
+    addTopBar = smartBarDeco U topBarTheme
     -- The default number of windows in the master pane
     nmaster = 1
     -- Default proportion of screen occupied by master pane
@@ -446,10 +463,11 @@ myAddSpaces len str = sstr ++ replicate (len - length sstr) ' '
 myStartupHook :: X ()
 myStartupHook = do
   -- spawn $ "wal -i " ++ myWallpapers -- pywal sets random wallpaper
-  spawnOnce $ "feh --randomize --bg-scale " ++ myWallpapers ++ "/*"  -- set wallpaper
+  spawn $ "feh --randomize --bg-scale " ++ myWallpapers ++ "/*"  -- set wallpaper
   spawnOnce "xsetroot -cursor_name left_ptr"
   -- spawnOnce "xscreensaver -no-splash &"
   spawnOnce "nm-applet --sm-disable &"
+  spawnOnce "blueman-applet &"
   spawnOnce "flameshot &"
   spawnOnce "[[ -s ~/.Xmodmap ]] && xmodmap ~/.Xmodmap"
   spawnOnce "/usr/bin/lxqt-policykit-agent &"
