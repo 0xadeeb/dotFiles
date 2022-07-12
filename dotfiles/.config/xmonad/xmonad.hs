@@ -52,6 +52,7 @@ import XMonad.Layout.LimitWindows (limitWindows, increaseLimit, decreaseLimit)
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Renamed
 import XMonad.Layout.Spacing
+import XMonad.Layout.ShowWName
 import XMonad.Layout.TabBarDecoration
 -- import XMonad.Layout.IfMax
 -- import XMonad.Layout.NoFrillsDecoration
@@ -90,9 +91,14 @@ myTabTheme = def
     , inactiveTextColor     = base00
     }
 
--- A tagging example:
---  workspaces = ["web", "irc", "code" ] ++ map show [4..9]
-myWorkspaces    = ["1","2","3","4","5","6","7","8","9"]
+myShowWNameTheme :: SWNConfig
+myShowWNameTheme = def
+  { swn_fade              = 1.0
+  , swn_bgcolor           = "#1c1f24"
+  , swn_color             = "#ffffff"
+  }
+
+myWorkspaces = ["Web", "Term", "Code", "Chat", "Vid" ] ++ map show [6..9]
 
 myNormalBorderColor  = "#ffffff"
 myFocusedBorderColor = "#00ffff"
@@ -211,7 +217,7 @@ myKeys =
     -- Open emacs
     , ("M-e e", spawn $ myEmacs ++ "-e '(dashboard-refresh-buffer)'")
     -- Restart emacs server
-    , ("M-e r", spawn  "killall emacs && emacs --daemon")
+    , ("M-e r", spawn  "killall emacs && emacs --daemon && notify-send Emacs \"Server ready!\"")
 
     -- Lock screen
     , ("M-S-l", spawn  "betterlockscreen -l")
@@ -242,8 +248,8 @@ myKeys =
     ]
 
     ++
-    [("M-" ++ m ++ [i], windows $ f [i])
-        | i <- "123456789"
+    [("M-" ++ m ++ (show i), windows $ f $ myWorkspaces !! (i - 1))
+        | i <- [1..9]
         , (f, m) <- [(W.greedyView, ""), (W.shift, "S-")]]
 
 myMouseBindings XConfig {XMonad.modMask = modm} = M.fromList
@@ -318,59 +324,54 @@ myLayout
     ||| spiral1
   where
     tiled             = renamed [Replace "Tiled"]
+                            $ avoidStruts
                             $ addTopBar
                             $ windowNavigation
                             $ addTabs shrinkText myTabTheme
                             $ subLayout [] Simplest
-                            $ avoidStruts
                             $ mySpacing gap
-                            $ noBorders
-                            $ smartBorders
                             $ Tall nmaster delta ratio
 
     magnifiedTiled    = renamed [Replace "Magnified"]
+                            $ avoidStruts
                             $ addTopBar
                             $ windowNavigation
                             $ addTabs shrinkText myTabTheme
                             $ subLayout [] Simplest
                             $ mySpacing gap
-                            $ avoidStruts
-                            $ smartBorders
                             $ Mag.magnifiercz' 1.1
-                            $ noBorders
-                            $ smartBorders
                             $ Tall nmaster delta ratio
 
     grid              = renamed [Replace "Grid"]
+                            $ avoidStruts
                             $ addTopBar
                             $ windowNavigation
                             $ addTabs shrinkText myTabTheme
                             $ subLayout [] Simplest
                             $ mySpacing gap
-                            $ avoidStruts
                             $ limitWindows 12
                             $ Grid
 
     full              = renamed [Replace "Full"]
-                            $ mySpacing gap
                             $ avoidStruts
+                            $ mySpacing gap
                             $ smartBorders
                             $ noBorders
                             $ Full
 
     mirror            = renamed [Replace "Mirror Tiled"]
+                            $ avoidStruts
                             $ addTopBar
                             $ windowNavigation
                             $ addTabs shrinkText myTabTheme
                             $ subLayout [] Simplest
                             $ mySpacing gap
-                            $ avoidStruts
                             $ Mirror
                             $ Tall nmaster delta ratio
 
     floats             = renamed [Replace "Float"]
-                            $ mySpacing gap
                             $ avoidStruts
+                            $ mySpacing gap
                             $ smartBorders
                             $ limitWindows 20
                             $ simplestFloat
@@ -381,12 +382,12 @@ myLayout
                             $ tabbed shrinkText myTabTheme
 
     spiral1            = renamed [Replace "Spiral"]
+                            $ avoidStruts
                             $ addTopBar
                             $ windowNavigation
                             $ addTabs shrinkText myTabTheme
                             $ subLayout [] Simplest
                             $ mySpacing gap
-                            $ avoidStruts
                             $ limitWindows 12
                             $ spiral (6/7)
 
@@ -407,6 +408,8 @@ myManageHook =
         manageSpawn = composeOne
           [ className =? "mpv"            -?> doFloat
           , className =? "Oblogout"       -?> doFloat
+          , className =? "Brave-browser"  -?> doShift $ myWorkspaces !! 0
+          , className =? "Emacs"          -?> doShift $ myWorkspaces !! 2
           , isDialog                      -?> doCenterFloat
           , resource  =? "desktop_window" -?> doIgnore
           , isDialog  -?> doCenterFloat
@@ -510,7 +513,7 @@ defaults = def {
         mouseBindings      = myMouseBindings,
 
       -- hooks, layouts
-        layoutHook         = myLayout,
+        layoutHook         = showWName' myShowWNameTheme $ myLayout,
         manageHook         = myManageHook,
         handleEventHook    = myEventHook,
         -- logHook            = myLogHook,

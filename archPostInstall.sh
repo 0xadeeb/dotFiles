@@ -128,21 +128,21 @@ function main() {
 
 	echo "Would you like to install xmonad"
 	read -r -p ":: [Y/n] " opt
-	if [[ ( ! -z "$opt" ) && ( "$opt" -eq "n" || "$opt" -eq "N" ) ]]
+	if [[ ( ! -z "$opt" ) && ( "$opt" == "n" || "$opt" == "N" ) ]]
 	then
 	   xmonadOpt="n"
 	fi
 
 	echo "Would you like to change default shell to zsh"
 	read -r -p ":: [Y/n] " opt
-	if [[ ( ! -z "$opt" ) && ( "$opt" -eq "n" || "$opt" -eq "N" ) ]]
+	if [[ ( ! -z "$opt" ) && ( "$opt" == "n" || "$opt" == "N" ) ]]
 	then
 	   zshOpt="n"
 	fi
 
 	echo "Would you like to install doom emacs"
 	read -r -p ":: [Y/n] " opt
-	if [[ ( ! -z "$opt" ) && ( "$opt" -eq "n" || "$opt" -eq "N" ) ]]
+	if [[ ( ! -z "$opt" ) && ( "$opt" == "n" || "$opt" == "N" ) ]]
 	then
 	   doomOpt="n"
 	fi
@@ -156,8 +156,11 @@ function main() {
 		helper="yay"
 	fi
 
+	cd $cfg
+
 	clear
 	echo "Doing a system update..."
+	git submodule update --remote --merge
 	sudo pacman --noconfirm -Syu
 
 	installNativePackages $cfg
@@ -167,17 +170,17 @@ function main() {
 
 	simlinkDotfiles $cfg
 
-	if [ "$xmonadOpt" -eq "y"  ]
+	if [ "$xmonadOpt" == "y"  ]
 	then
 		installXmonad $cfg $helper
 	fi
 
-	if [ "$zshOpt" != "y" ]
+	if [ "$zshOpt" == "y" ]
 	then
 		setupZsh
 	fi
 
-	if [ "$doomOpt" -eq "y"  ]
+	if [ "$doomOpt" == "y"  ]
 	then
 		installDoomEmacs
 	fi
