@@ -21,6 +21,7 @@
   - [[#resizing-windows][Resizing windows]]
   - [[#switch-m-x-and-eval-expression-key-maps][Switch M-x and eval Expression key maps]]
   - [[#switch-evil-beginning-of-line-and-first-non-white-space-character-keys][Switch evil beginning of line and first non white space character keys]]
+  - [[#remaping-register-commands-to-spc-r][Remaping register commands to SPC r]]
   - [[#define-back-tab][Define back tab]]
 - [[#devepolment][Devepolment]]
   - [[#company-mode][Company mode]]
@@ -206,6 +207,13 @@ Use ~SPC w c~ and then the following keys
 #+begin_src elisp
 (define-key evil-normal-state-map (kbd "0") #'evil-first-non-blank)
 (define-key evil-normal-state-map (kbd "^") #'evil-beginning-of-line)
+#+end_src
+
+** Remaping register commands to SPC r
+#+begin_src emacs-lisp
+(map! :leader
+      :desc "Register"
+      "r" ctl-x-r-map)
 #+end_src
 
 ** Define back tab

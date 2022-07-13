@@ -93,6 +93,10 @@
 (define-key evil-normal-state-map (kbd "0") #'evil-first-non-blank)
 (define-key evil-normal-state-map (kbd "^") #'evil-beginning-of-line)
 
+(map! :leader
+      :desc "Register"
+      "r" ctl-x-r-map)
+
 (global-set-key (kbd "<backtab>") 'un-indent-by-removing-4-spaces)
 (defun un-indent-by-removing-4-spaces ()
   "remove 4 spaces or a tab from beginning of of line"

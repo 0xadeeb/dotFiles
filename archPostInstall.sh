@@ -58,21 +58,27 @@ function installXmonad () {
 	clear
 	echo "Installing xmonad as the window manager..."
 	sleep 2
-	cd ~/.config/xmonad
-	if [ -d "$HOME/.local/bin" ] ; then
-		PATH="$HOME/.local/bin:$PATH"
+	if [ $3 -eq 1 ]
+	then
+		cd ~/.config/xmonad
+		if [ -d "$HOME/.local/bin" ] ; then
+			PATH="$HOME/.local/bin:$PATH"
+		else
+			mkdir -p ~/.local/bin
+			PATH="$HOME/.local/bin:$PATH"
+		fi
+		sudo pacman -S --noconfirm --needed stack
+		stack upgrade
+		[ -f "stack.yaml" ] && rm stack.yaml
+		stack init
+		stack install
+		sudo ln -s $HOME/.local/bin/{xmonad,xmonad-dbus} /usr/bin
 	else
-		mkdir -p ~/.local/bin
-		PATH="$HOME/.local/bin:$PATH"
+		sudo pacman -S --noconfirm --needed xmonad xmonad-contrib
+		$2 -S --noconfirm --needed xmonad-dbus-git
 	fi
-	sudo pacman -S --noconfirm --needed stack
-	stack upgrade
-	[ -f "stack.yaml" ] && rm stack.yaml
-	stack init
-	stack install
-	sudo ln -s $HOME/.local/bin/{xmonad,xmonad-dbus} /usr/bin
-	xmonad --recompile
 
+	xmonad --recompile
 	echo "Setting up sddm as the login manager..."
 
 	[ ! -d "/usr/share/xsessions" ] && sudo mkdir -p /usr/share/xsessions
@@ -172,7 +178,7 @@ function main() {
 
 	if [ "$xmonadOpt" == "y"  ]
 	then
-		installXmonad $cfg $helper
+		installXmonad $cfg $helper 1
 	fi
 
 	if [ "$zshOpt" == "y" ]
@@ -180,9 +186,11 @@ function main() {
 		setupZsh
 	fi
 
-	if [ "$doomOpt" == "y"  ]
+	if [  "$doomOpt" == "y"  ]
 	then
-		installDoomEmacs
+		# FIXME: this doesn't work for some reason
+		# installDoomEmacs
+		echo "Doom install not working"
 	fi
 
 	clear
