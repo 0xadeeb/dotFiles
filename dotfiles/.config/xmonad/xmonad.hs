@@ -98,7 +98,7 @@ myShowWNameTheme = def
   , swn_color             = "#ffffff"
   }
 
-myWorkspaces = ["Web", "Term", "Code", "Chat", "Vid" ] ++ map show [6..9]
+myWorkspaces = ["Web", "Term", "Code", "Chat", "Vid" ] ++ map show [6..9] ++ ["Miscl"]
 
 myNormalBorderColor  = "#ffffff"
 myFocusedBorderColor = "#00ffff"
@@ -174,7 +174,7 @@ myKeys =
     , ("M-k", windows W.focusUp  )
 
     -- Move focus to the master window
-    , ("M-m", windows W.focusMaster  )
+    -- , ("M-m", windows W.focusMaster  )
 
     -- Swap the focused window and the master window
     , ("M-<Return>", windows W.swapMaster)
@@ -216,8 +216,9 @@ myKeys =
 
     -- Open emacs
     , ("M-e e", spawn $ myEmacs ++ "-e '(dashboard-refresh-buffer)'")
+
     -- Restart emacs server
-    , ("M-e r", spawn  "killall emacs && emacs --daemon && notify-send Emacs \"Server ready!\"")
+    , ("M-e r", spawn  "~/.local/bin/startEmacs.sh")
 
     -- Lock screen
     , ("M-S-l", spawn  "betterlockscreen -l")
@@ -245,6 +246,11 @@ myKeys =
 
     -- No borders
     --, ("M-S-n" SendMessage )
+
+    -- Move to miscl workspace
+    , ("M-m", windows $ W.greedyView $ last myWorkspaces)
+    , ("M-S-m", windows $ W.shift $ last myWorkspaces)
+
     ]
 
     ++
@@ -435,11 +441,12 @@ forceCenterFloat = doFloatDep move
     x = (1-w)/2
     y = (1-h)/2
 
-myEventHook = swallowEventHook (className =? "kitty"  <||> className =? "Termite") (return True)
+myEventHook = swallowEventHook (className =? "kitty"
+                                 <||> className =? "Termite") (return True)
 
 myLogHook :: X ()
 myLogHook = fadeInactiveLogHook fadeAmount
-            where fadeAmount = 1.0
+            where fadeAmount = 0.9
 
 blue, lowWhite, magenta, red, white, yellow :: String
 magenta  = "#ff79c6"
@@ -457,7 +464,7 @@ myLogHookPP dbus = def
     , ppVisible = wrap ("%{F" ++ blue ++ "} ") " %{F-}"
     , ppUrgent = wrap ("%{F" ++ red ++ "} ") " %{F-}"
     , ppTitle = wrap ("%{F" ++ lowWhite ++ "} ") " %{F-}"
-    , ppOrder           = \[_ , l, _] -> [l]
+    , ppOrder           = \[_,l,_] -> [l]
     , ppSep  =  "•"
     }
 
@@ -477,12 +484,13 @@ myStartupHook = do
   spawnOnce "flameshot &"
   spawnOnce "[[ -s ~/.Xmodmap ]] && xmodmap ~/.Xmodmap"
   spawnOnce "/usr/bin/lxqt-policykit-agent &"
+  spawnOnce "libinput-gestures-setup start"
   spawnOnce "xfce4-power-manager &"
   spawnOnce "picom &"
-  spawnOnce "alttab -fg \"#d58681\" -bg \"#4a4a4a\" -frame \"#eb564d\" -t 128x150 -i 127x64 -w 1"
+  spawnOnce "alttab -fg \"#d58681\" -bg \"#4a4a4a\" -frame \"#eb564d\" -t 128x150 -i 127x64 -w 1 &"
   spawnOnce "~/.config/polybar/launch.sh --forest"
   spawnOnce "~/.config/conky/conky-startup.sh"
-  spawnOnce "/usr/bin/emacs --daemon"
+  spawnOnce "~/.local/bin/startEmacs.sh"
 
 main = do
   -- Connect to DBus

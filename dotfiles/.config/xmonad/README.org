@@ -162,7 +162,7 @@ The default number of workspaces (virtual screens) and their names.
 By default numeric strings is used, but any string may be used as a workspace name. The number of workspaces is determined by the length of this list.
 
 #+begin_src haskell
-myWorkspaces = ["Web", "Term", "Code", "Chat", "Vid" ] ++ map show [6..9]
+myWorkspaces = ["Web", "Term", "Code", "Chat", "Vid" ] ++ map show [6..9] ++ ["Miscl"]
 #+end_src
 
 *** Border colors for unfocused and focused windows, respectively
@@ -250,7 +250,7 @@ myKeys =
     , ("M-k", windows W.focusUp  )
 
     -- Move focus to the master window
-    , ("M-m", windows W.focusMaster  )
+    -- , ("M-m", windows W.focusMaster  )
 
     -- Swap the focused window and the master window
     , ("M-<Return>", windows W.swapMaster)
@@ -292,8 +292,9 @@ myKeys =
 
     -- Open emacs
     , ("M-e e", spawn $ myEmacs ++ "-e '(dashboard-refresh-buffer)'")
+
     -- Restart emacs server
-    , ("M-e r", spawn  "killall emacs && emacs --daemon && notify-send Emacs \"Server ready!\"")
+    , ("M-e r", spawn  "~/.local/bin/startEmacs.sh")
 
     -- Lock screen
     , ("M-S-l", spawn  "betterlockscreen -l")
@@ -321,6 +322,11 @@ myKeys =
 
     -- No borders
     --, ("M-S-n" SendMessage )
+
+    -- Move to miscl workspace
+    , ("M-m", windows $ W.greedyView $ last myWorkspaces)
+    , ("M-S-m", windows $ W.shift $ last myWorkspaces)
+
     ]
 #+end_src
 
@@ -565,14 +571,15 @@ forceCenterFloat = doFloatDep move
 Defines a custom handler function for X Events. The function should return (All True) if the default handler is to be run afterwards. To combine event hooks use ~mappend~ or ~mconcat~ from Data.Monoid.
 
 #+begin_src haskell
-myEventHook = swallowEventHook (className =? "kitty"  <||> className =? "Termite") (return True)
+myEventHook = swallowEventHook (className =? "kitty"
+                                 <||> className =? "Termite") (return True)
 #+end_src
 
 * Log Hook
 #+begin_src haskell
 myLogHook :: X ()
 myLogHook = fadeInactiveLogHook fadeAmount
-            where fadeAmount = 1.0
+            where fadeAmount = 0.9
 #+end_src
 
 * Set colours
@@ -598,7 +605,7 @@ myLogHookPP dbus = def
     , ppVisible = wrap ("%{F" ++ blue ++ "} ") " %{F-}"
     , ppUrgent = wrap ("%{F" ++ red ++ "} ") " %{F-}"
     , ppTitle = wrap ("%{F" ++ lowWhite ++ "} ") " %{F-}"
-    , ppOrder           = \[_ , l, _] -> [l]
+    , ppOrder           = \[_,l,_] -> [l]
     , ppSep  =  "•"
     }
 
@@ -622,12 +629,13 @@ myStartupHook = do
   spawnOnce "flameshot &"
   spawnOnce "[[ -s ~/.Xmodmap ]] && xmodmap ~/.Xmodmap"
   spawnOnce "/usr/bin/lxqt-policykit-agent &"
+  spawnOnce "libinput-gestures-setup start"
   spawnOnce "xfce4-power-manager &"
   spawnOnce "picom &"
-  spawnOnce "alttab -fg \"#d58681\" -bg \"#4a4a4a\" -frame \"#eb564d\" -t 128x150 -i 127x64 -w 1"
+  spawnOnce "alttab -fg \"#d58681\" -bg \"#4a4a4a\" -frame \"#eb564d\" -t 128x150 -i 127x64 -w 1 &"
   spawnOnce "~/.config/polybar/launch.sh --forest"
   spawnOnce "~/.config/conky/conky-startup.sh"
-  spawnOnce "/usr/bin/emacs --daemon"
+  spawnOnce "~/.local/bin/startEmacs.sh"
 #+end_src
 
 * Xmobar Config

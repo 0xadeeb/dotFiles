@@ -166,8 +166,9 @@ function main() {
 
 	clear
 	echo "Doing a system update..."
-	git submodule update --remote --merge
+	sudo sh -c 'echo -e "\nDefaults timestamp_timeout=-1">>/etc/sudoers'
 	sudo pacman --noconfirm -Syu
+	git submodule update --remote --merge
 
 	installNativePackages $cfg
 
@@ -189,8 +190,7 @@ function main() {
 	if [  "$doomOpt" == "y"  ]
 	then
 		# FIXME: this doesn't work for some reason
-		# installDoomEmacs
-		echo "Doom install not working"
+		installDoomEmacs
 	fi
 
 	clear
