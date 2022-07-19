@@ -10,19 +10,44 @@
 ;; (when (daemonp)
 ;;   (exec-path-from-shell-initialize))
 
-(setq doom-theme 'doom-dracula)
+(defun icy/load-theme ()
+  (interactive)
+  (load-theme 'doom-catppuccin t))
+
+(if (daemonp)
+    (add-hook 'after-make-frame-functions
+              (lambda (frame)
+                (with-selected-frame frame (icy/load-theme))))
+  (icy/load-theme))
+
+(custom-set-faces!
+  '(doom-modeline-buffer-modified :foreground "orange"))
+
+(with-eval-after-load 'solaire-mode
+  (add-to-list 'solaire-mode-themes-to-face-swap "^doom-"))
 
 (setq scroll-margin 3)
 (setq hscroll-margin 3)
 
-(setq doom-font (font-spec :family "Source Code Pro" :size 25 :weight 'normal)
-      doom-variable-pitch-font (font-spec :family "Source Code Pro" :size 23)
-      doom-big-font (font-spec :family "Source Code Pro" :size 35 :weight 'normal))
-(after! doom-themes
-  (setq doom-themes-enable-bold t
-        doom-themes-enable-italic t))
+(setq doom-font
+      (font-spec
+       :family "VictorMono Nerd Font"
+       :size 15.0
+       :weight 'semi-bold)
+      doom-big-font
+      (font-spec
+       :family "VictorMono Nerd Font"
+       :size 23.0
+       :weight 'semi-bold)
+      doom-variable-pitch-font
+      (font-spec
+       :family "VictorMono Nerd Font"
+       :size 15.0
+       :weight 'semi-bold))
 (custom-set-faces!
+  '(font-lock-builtin-face :slant italic)
   '(font-lock-comment-face :slant italic)
+  '(font-lock-function-name-face :weight bold :slane italic)
   '(font-lock-keyword-face :slant italic))
 
 (use-package fira-code-mode

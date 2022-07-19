@@ -85,8 +85,29 @@ Emacs instance launched as a GUI app inherits a default minimal set of environme
 + There are two ways to load a theme. Both assume the theme is installed and available. You can either set ~doom-theme~ or manually load a theme with the ~load-theme~ function. This is the default:
 
 ** Theme
-#+begin_src elisp
+*** Dracula theme
+#+begin_src elisp :tangle no
 (setq doom-theme 'doom-dracula)
+#+end_src
+
+*** Catppuccin theme
+#+begin_src elisp
+(defun icy/load-theme ()
+  (interactive)
+  (load-theme 'doom-catppuccin t))
+
+(if (daemonp)
+    (add-hook 'after-make-frame-functions
+              (lambda (frame)
+                (with-selected-frame frame (icy/load-theme))))
+  (icy/load-theme))
+
+(custom-set-faces!
+  '(doom-modeline-buffer-modified :foreground "orange"))
+
+(with-eval-after-load 'solaire-mode
+  (add-to-list 'solaire-mode-themes-to-face-swap "^doom-"))
+
 #+end_src
 
 ** Scrolling
@@ -96,7 +117,8 @@ Emacs instance launched as a GUI app inherits a default minimal set of environme
 #+end_src
 
 ** Font
-#+begin_src elisp
+*** Source Code Pro
+#+begin_src elisp :tangle no
 (setq doom-font (font-spec :family "Source Code Pro" :size 25 :weight 'normal)
       doom-variable-pitch-font (font-spec :family "Source Code Pro" :size 23)
       doom-big-font (font-spec :family "Source Code Pro" :size 35 :weight 'normal))
@@ -106,7 +128,35 @@ Emacs instance launched as a GUI app inherits a default minimal set of environme
 (custom-set-faces!
   '(font-lock-comment-face :slant italic)
   '(font-lock-keyword-face :slant italic))
+#+end_src
 
+*** VictorMono
+#+begin_src elisp
+(setq doom-font
+      (font-spec
+       :family "VictorMono Nerd Font"
+       :size 15.0
+       :weight 'semi-bold)
+      doom-big-font
+      (font-spec
+       :family "VictorMono Nerd Font"
+       :size 23.0
+       :weight 'semi-bold)
+      doom-variable-pitch-font
+      (font-spec
+       :family "VictorMono Nerd Font"
+       :size 15.0
+       :weight 'semi-bold))
+(custom-set-faces!
+  '(font-lock-builtin-face :slant italic)
+  '(font-lock-comment-face :slant italic)
+  '(font-lock-function-name-face :weight bold :slane italic)
+  '(font-lock-keyword-face :slant italic))
+#+end_src
+
+*** Fira code
+Helpes enable extra ligatures
+#+begin_src elisp
 (use-package fira-code-mode
   :config
   (fira-code-mode-set-font)
