@@ -89,9 +89,8 @@ function installXmonad () {
 
 	$2 -S --noconfirm --needed sddm-theme-astronaut
 
-	echo "[Theme]" >> $1/sddm.conf
-	echo "Current=astronaut" >> $1/sddm.conf
-	sudo mv $1/sddm.conf /etc/sddm.conf
+	sudo sh -c 'echo "[Theme]" >> /etc/sddm.conf'
+	sudo sh -c 'echo "Current=astronaut" >> /etc/sddm.conf'
 
 }
 
@@ -194,6 +193,7 @@ function main() {
 	fi
 
 	clear
+	sudo sed '$d' -i /etc/sudoers
 	echo "Installation process done!"
 	echo "Restart to enjoy your new setup ;-)"
 	sleep 2
