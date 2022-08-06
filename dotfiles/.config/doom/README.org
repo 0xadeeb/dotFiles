@@ -91,10 +91,16 @@ Emacs instance launched as a GUI app inherits a default minimal set of environme
 #+end_src
 
 *** Catppuccin theme
+
+#+begin_src elisp :tangle no
+(setq doom-theme 'doom-catppuccin)
+#+end_src
+
 #+begin_src elisp
 (defun icy/load-theme ()
   (interactive)
   (load-theme 'doom-catppuccin t))
+
 
 (if (daemonp)
     (add-hook 'after-make-frame-functions

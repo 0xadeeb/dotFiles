@@ -4,8 +4,13 @@ ant-dracula-gtk-theme
 betterlockscreen-git
 blueman-git
 brave-bin
+catppuccin-gtk-theme
 earbuds
+gtypist-single-space
+libinput-gestures-git
 nerd-fonts-mononoki
+nerd-fonts-source-code-pro
+nerd-fonts-victor-mono
 oblogout-py3-git
 pacman-hook-list-installed-packages
 paru
@@ -16,4 +21,5 @@ snap-pac-grub
 snapper-gui-git
 snapper-rollback
 ttf-icomoon-feather
+ttf-malayalam-fonts-meta
 ttf-twemoji

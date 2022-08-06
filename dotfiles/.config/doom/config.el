@@ -14,6 +14,7 @@
   (interactive)
   (load-theme 'doom-catppuccin t))
 
+
 (if (daemonp)
     (add-hook 'after-make-frame-functions
               (lambda (frame)

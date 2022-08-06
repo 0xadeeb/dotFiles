@@ -20,11 +20,14 @@ exa
 fakeroot
 fd
 feh
+firefox
 flameshot
 flex
 fzf
 gcc
+gdb
 git
+gparted
 groff
 grub
 gvfs
@@ -51,8 +54,9 @@ neofetch
 network-manager-applet
 networkmanager
 noto-fonts-emoji
+npm
 ntfs-3g
-nvidia-dkms
+nvidia
 nvidia-settings
 nvidia-utils
 os-prober
@@ -71,6 +75,7 @@ reflector
 ripgrep
 rofi
 sddm
+simplescreenrecorder
 snapper
 stack
 starship
@@ -82,11 +87,13 @@ texinfo
 trash-cli
 ttc-iosevka
 ttf-dejavu
+ttf-fira-code
 ttf-font-awesome
 ttf-jetbrains-mono
 udiskie
 unzip
 upower
+vi
 vim
 wget
 which
@@ -95,6 +102,7 @@ wmctrl
 wpa_supplicant
 xdg-user-dirs
 xdg-utils
+xdotool
 xf86-video-vesa
 xfce4-power-manager
 xorg-bdftopcf

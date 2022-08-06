@@ -42,12 +42,14 @@ import XMonad.Layout.SimplestFloat
 import XMonad.Layout.Spiral
 import XMonad.Layout.SubLayouts
 import XMonad.Layout.Tabbed
+import XMonad.Layout.ThreeColumns
 
 -- Layout modifiers
 import XMonad.Layout.Decoration
 import XMonad.Layout.Groups
 import XMonad.Layout.WindowNavigation
 import XMonad.Layout.LayoutModifier
+import XMonad.Layout.PerWorkspace
 import XMonad.Layout.LimitWindows (limitWindows, increaseLimit, decreaseLimit)
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Renamed
@@ -145,8 +147,7 @@ myKeys =
     -- , ("M-S-<Space>", setLayout $ XMonad.layoutHook XConfig)
 
     -- Jump to layouts
-    , ("M-f" , sendMessage $ JumpToLayout "Full"     ) --Switch to the full layout
-    , ("M-S-t" , sendMessage $ JumpToLayout "Tabbed"     ) --Switch to the tabbed layout
+    , ("M-f" , sendMessage $ JumpToLayout "Tabbed"     ) --Switch to the full tabbed layout
     , ("M-g" , sendMessage $ JumpToLayout "Grid"     ) --Switch to the grid layout
 
     -- Resize viewed windows to the correct size
@@ -321,14 +322,17 @@ smartBarDeco direction theme =
 
 myLayout
   = tiled
-    ||| grid
-    ||| floats
-    ||| magnifiedTiled
-    ||| mirror
-    ||| full
-    ||| tabs
-    ||| spiral1
+        ||| grid
+        ||| threeCol
+        ||| floats
+        ||| magnifiedTiled
+        ||| mirror
+        ||| full
+        ||| tabs
+        ||| spiral1
+
   where
+
     tiled             = renamed [Replace "Tiled"]
                             $ avoidStruts
                             $ addTopBar
@@ -337,6 +341,15 @@ myLayout
                             $ subLayout [] Simplest
                             $ mySpacing gap
                             $ Tall nmaster delta ratio
+
+    threeCol          = renamed [Replace "Three Column"]
+                            $ avoidStruts
+                            $ addTopBar
+                            $ windowNavigation
+                            $ addTabs shrinkText myTabTheme
+                            $ subLayout [] Simplest
+                            $ mySpacing gap
+                            $ ThreeColMid nmaster delta ratio
 
     magnifiedTiled    = renamed [Replace "Magnified"]
                             $ avoidStruts
@@ -407,23 +420,34 @@ myLayout
     -- Border space
     gap = 10
 
+manageWorkspace
+  :: (WorkspaceId -> Bool)
+  -> ManageHook
+  -> ManageHook
+  -> ManageHook
+manageWorkspace p h1 h2 = do
+    i <- liftX $ gets $ W.currentTag . windowset
+    if p i
+       then h1
+    else h2
+
 myManageHook =
     manageSpawn
-    <+> insertPosition Master Newer
+    <+> manageWorkspace ( `elem` ["Code"] ) ( insertPosition End Newer ) ( insertPosition Master Newer )
       where
         manageSpawn = composeOne
           [ className =? "mpv"            -?> doFloat
           , className =? "Oblogout"       -?> doFloat
-          , className =? "Brave-browser"  -?> doShift $ myWorkspaces !! 0
-          , className =? "Emacs"          -?> doShift $ myWorkspaces !! 2
+          , isRole =? "pop-up" -?> doCenterFloat
           , isDialog                      -?> doCenterFloat
           , resource  =? "desktop_window" -?> doIgnore
           , isDialog  -?> doCenterFloat
           , isBrowserDialog -?> forceCenterFloat
           , isRole =? gtkFile  -?> forceCenterFloat
-          , isRole =? "pop-up" -?> doCenterFloat
           , isInProperty "_NET_WM_WINDOW_TYPE"
                          "_NET_WM_WINDOW_TYPE_SPLASH" -?> doCenterFloat
+          , className =?  myBrowserClass  -?> doShift $ myWorkspaces !! 0
+          , className =? "Emacs"          -?> doShift $ myWorkspaces !! 2
           ]
         isBrowserDialog = isDialog <&&> className =? myBrowserClass
         gtkFile = "GtkFileChooserDialog"

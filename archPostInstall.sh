@@ -105,8 +105,8 @@ function setupZsh() {
 		mv ~/.zshrc ~/.zshrc.pre-oh-my-zsh
 		sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 		mv ~/.zshrc.pre-oh-my-zsh ~/.zshrc
-		chsh -s $(type -a zsh | cut -d ' ' -f 3)
 	fi
+	sudo chsh -s $(type -a zsh | cut -d ' ' -f 3) $(whoami)
 
 	[ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ] && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 	[ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ] && git clone https://github.com/zsh-users/zsh-autosuggestions.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
@@ -118,7 +118,7 @@ function installDoomEmacs() {
 	sleep 2
 	sudo pacman -S --noconfirm --needed git emacs ripgrep fd
 	git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.emacs.d
-	~/.emacs.d/bin/doom install
+	~/.emacs.d/bin/doom --force install
 	~/.emacs.d/bin/doom sync
 }
 
