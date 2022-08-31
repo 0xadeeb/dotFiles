@@ -20,7 +20,7 @@ function installAurHelper() {
 		fi
 		git clone "https://aur.archlinux.org/$1.git"
 		cd $1
-		makepkg --noconfirm -si
+		sudo -u $(logname) makepkg --noconfirm -si
 	else
 		echo "$1 has already been installed!"
 		sleep 2
@@ -106,7 +106,7 @@ function setupZsh() {
 		sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 		mv ~/.zshrc.pre-oh-my-zsh ~/.zshrc
 	fi
-	sudo chsh -s $(type -a zsh | cut -d ' ' -f 3) $(whoami)
+	sudo chsh -s $(which zsh) $(logname)
 
 	[ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ] && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 	[ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ] && git clone https://github.com/zsh-users/zsh-autosuggestions.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
@@ -165,7 +165,7 @@ function main() {
 
 	clear
 	echo "Doing a system update..."
-	sudo sh -c 'echo -e "\nDefaults timestamp_timeout=-1">>/etc/sudoers'
+	#sudo sh -c 'echo -e "\nDefaults timestamp_timeout=-1" >> /etc/sudoers'
 	sudo pacman --noconfirm -Syu
 	git submodule update --remote --merge
 
@@ -193,7 +193,7 @@ function main() {
 	fi
 
 	clear
-	sudo sed '$d' -i /etc/sudoers
+	#sudo sed '$d' -i /etc/sudoers
 	echo "Installation process done!"
 	echo "Restart to enjoy your new setup ;-)"
 	sleep 2

@@ -285,7 +285,7 @@ mySpacing' :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spac
 mySpacing' i = spacingRaw False (Border i (2 * i) i i) True (Border 0 0 i i) True
 
 myTabbedSpacing :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
-myTabbedSpacing i = spacingRaw False (Border i i (2 * i) (2 * i)) True (Border 0 0 0 0) True
+myTabbedSpacing i = spacingRaw False (Border (2 * i) (2 * i) (2 * i) (2 * i)) True (Border 0 0 0 0) True
 
 newtype SmartBarDeco a = SmartBarDeco Direction2D
   deriving (Eq, Show, Read)
@@ -446,7 +446,8 @@ myManageHook =
           , isRole =? gtkFile  -?> forceCenterFloat
           , isInProperty "_NET_WM_WINDOW_TYPE"
                          "_NET_WM_WINDOW_TYPE_SPLASH" -?> doCenterFloat
-          , className =?  myBrowserClass  -?> doShift $ myWorkspaces !! 0
+          , title =? "WhatsApp - Brave" -?>  doShift $ myWorkspaces !! 3
+          , className =? myBrowserClass  -?> doShift $ myWorkspaces !! 0
           , className =? "Emacs"          -?> doShift $ myWorkspaces !! 2
           ]
         isBrowserDialog = isDialog <&&> className =? myBrowserClass
@@ -513,7 +514,7 @@ myStartupHook = do
   spawnOnce "picom &"
   spawnOnce "alttab -fg \"#d58681\" -bg \"#4a4a4a\" -frame \"#eb564d\" -t 128x150 -i 127x64 -w 1 &"
   spawnOnce "~/.config/polybar/launch.sh --forest"
-  spawnOnce "~/.config/conky/conky-startup.sh"
+  -- spawnOnce "~/.config/conky/conky-startup.sh"
   spawnOnce "~/.local/bin/startEmacs.sh"
 
 main = do

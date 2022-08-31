@@ -113,9 +113,9 @@ Can be an integer to determine the exact padding."
    (Man-overstrike :inherit 'bold :foreground magenta)
    (Man-underline :inherit 'underline :foreground blue)
    ;;;; org <built-in>
-   ((org-block &override) :background base2)
-   ((org-block-background &override) :background base2)
-   ((org-block-begin-line &override) :background base2)
+   ((org-block &override) :background base1)
+   ((org-block-background &override) :background base1)
+   ((org-block-begin-line &override) :background base1)
    ;;;; rainbow-delimiters
    (rainbow-delimiters-depth-1-face :foreground magenta)
    (rainbow-delimiters-depth-2-face :foreground orange)
@@ -128,6 +128,7 @@ Can be an integer to determine the exact padding."
    (rainbow-delimiters-depth-9-face :foreground dark-cyan)
    ;;;; rjsx-mode
    (rjsx-tag :foreground red)
-   (rjsx-attr :foreground yellow :slant 'italic :weight 'medium)))
+   (rjsx-attr :foreground yellow :slant 'italic :weight 'medium)
+   ))
 
 ;;; doom-catppuccin-theme.el ends here

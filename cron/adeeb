@@ -1,1 +1,2 @@
-@daily /usr/bin/trash-empty 14
+%daily * * /usr/bin/trash-empty 14 -f
+* * * * * $HOME/.local/bin/notifyBatteryStatus.sh

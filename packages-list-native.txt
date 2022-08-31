@@ -9,6 +9,8 @@ bison
 bluez
 bluez-utils
 brightnessctl
+btrfs-progs
+cmake
 conky
 dialog
 dmenu
@@ -18,6 +20,7 @@ efibootmgr
 emacs
 exa
 fakeroot
+fcron
 fd
 feh
 firefox
@@ -30,7 +33,10 @@ git
 gparted
 groff
 grub
+grub-btrfs
 gvfs
+gvfs-gphoto2
+gvfs-mtp
 htop
 inetutils
 jq
@@ -47,6 +53,7 @@ make
 mcfly
 mpv
 mtools
+mtpfs
 ncdu
 nemo
 nemo-fileroller
@@ -74,6 +81,7 @@ ranger
 reflector
 ripgrep
 rofi
+rust
 sddm
 simplescreenrecorder
 snapper
@@ -154,6 +162,7 @@ xorg-xwininfo
 xorg-xwud
 zathura
 zathura-pdf-poppler
+zenity
 zoxide
 zsh
 zsh-completions

@@ -21,8 +21,10 @@
                 (with-selected-frame frame (icy/load-theme))))
   (icy/load-theme))
 
-(custom-set-faces!
-  '(doom-modeline-buffer-modified :foreground "orange"))
+;; (custom-set-faces!
+;;   '(doom-modeline-buffer-modified :foreground "orange"))
+
+(setf treemacs-window-background-color (cons "#1A1826" "#302D41"))
 
 (with-eval-after-load 'solaire-mode
   (add-to-list 'solaire-mode-themes-to-face-swap "^doom-"))
@@ -45,16 +47,23 @@
        :family "VictorMono Nerd Font"
        :size 15.0
        :weight 'semi-bold))
+
+(after! doom-themes
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t))
+
 (custom-set-faces!
   '(font-lock-builtin-face :slant italic)
   '(font-lock-comment-face :slant italic)
-  '(font-lock-function-name-face :weight bold :slane italic)
+  '(font-lock-function-name-face :weight bold :slant italic)
   '(font-lock-keyword-face :slant italic))
 
 (use-package fira-code-mode
   :config
   (fira-code-mode-set-font)
-  :custom (fira-code-mode-disabled-ligatures '("www" "[]" "#{" "#(" "#_" "#_(" "x" "***" "<>")) ;; List of ligatures to turn off
+  :custom
+  (fira-code-mode-disabled-ligatures '("www" "[]" "#{" "#(" "#_" "#_(" "x" "***" "<>")) ;; List of ligatures to turn off
+  (prettify-symbols-unprettify-at-point t)
   :hook prog-mode org-mode ;; Enables fira-code-mode automatically for programming and org major modes
   )
 (set-language-environment "UTF-8")
@@ -115,9 +124,6 @@
 
 (map! :leader
       :desc "Eval Expression" ":" #'eval-expression)
-
-(define-key evil-normal-state-map (kbd "0") #'evil-first-non-blank)
-(define-key evil-normal-state-map (kbd "^") #'evil-beginning-of-line)
 
 (map! :leader
       :desc "Register"
@@ -232,6 +238,8 @@
     :product       "product"
     )
    )
+
+(add-to-list 'auto-mode-alist '("\\.xsm\\'" . asm-mode))
 
 (use-package autoinsert
   :config

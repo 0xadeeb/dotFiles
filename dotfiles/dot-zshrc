@@ -107,7 +107,6 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 
 alias zrc="vim ~/.zshrc"
-alias ohmyzsh="vim ~/.oh-my-zsh"
 alias ls='exa'
 alias la='exa -a'
 alias ll='exa -l'
@@ -118,11 +117,11 @@ alias df='df -h'
 alias du='du -h'
 alias cp="cp -i"
 alias mv='mv -i'
-alias rm='trash-put'
+alias rm='echo "Is this the command you are looking for?"; false'
+alias tp='trash-put'
 alias ln='ln -i'
 alias eb='earbuds'
 alias brc='vim ~/.bashrc'
-alias prg='g++ -o test'
 alias ps='procs'
 alias yay='paru'
 
@@ -211,7 +210,13 @@ function up () {
     echo "Couldn't go up $limit dirs.";
   fi
 }
+# OS Lab
+if [[ -f $HOME/myexpos/aliases.sh ]]; then
+  source $HOME/myexpos/aliases.sh
+fi
+
 # For smart history search
+export MCFLY_KEY_SCHEME=vim
 eval "$(mcfly init zsh)"
 
 ### SETTING THE STARSHIP PROMPT ###
