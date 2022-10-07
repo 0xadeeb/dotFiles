@@ -40,7 +40,8 @@ function send_notification {
             fi
         fi
     fi
-    bar=$(seq -s "─" $(($volume/4 + 1)) | sed 's/[0-9]//g')
+	barVol=$((volume < 100 ? volume : 100))
+    bar=$(seq -s "─" $(($barVol/4 + 1)) | sed 's/[0-9]//g')
     # Send the notification
     $DIR/$notify/notify-send.sh "$volume""     ""$bar" -i "$icon_name" -a "volumeControl" -t 2000  --replace=555
 
@@ -51,12 +52,14 @@ case $1 in
         # Set the volume on (if it was muted)
         amixer set Master on > /dev/null
         # Up the volume (+ 2%)
-        amixer sset Master 2%+ > /dev/null
+        # amixer sset Master 2%+ > /dev/null
+		pactl set-sink-volume 0 +2% > /dev/null
         send_notification
         ;;
     down)
         amixer set Master on > /dev/null
-        amixer sset Master 2%- > /dev/null
+        #amixer sset Master 2%- > /dev/null
+		pactl set-sink-volume 0 -2% > /dev/null
         send_notification
         ;;
     toggle)

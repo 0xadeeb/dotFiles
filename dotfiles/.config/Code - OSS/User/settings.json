@@ -1,0 +1,35 @@
+{
+    "window.zoomLevel": 3,
+    "vim.leader" : " " ,
+    "editor.lineNumbers": "relative",
+    "vim.insertModeKeyBindings": [
+        {
+            "before": ["f", "j"],
+            "after": ["<Esc>"]
+        }
+    ],
+    "vim.normalModeKeyBindings": [
+        {
+          "before" : ["<leader>","p"],
+          "commands" : [
+            "workbench.view.explorer"
+          ]
+        },
+        {
+          "before" : ["<leader>","f","s"],
+          "commands" : [
+            "workbench.action.files.save"
+          ]
+        },
+        {
+          "before" : ["<leader>","b","b"],
+          "commands" : [
+            "workbench.action.quickOpen"
+          ]
+        }
+    ],
+    "editor.cursorSmoothCaretAnimation": true,
+    "explorer.confirmDragAndDrop": false,
+    "editor.minimap.enabled": false,
+    "editor.acceptSuggestionOnCommitCharacter": false
+}

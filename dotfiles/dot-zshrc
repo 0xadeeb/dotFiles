@@ -211,8 +211,8 @@ function up () {
   fi
 }
 # OS Lab
-if [[ -f $HOME/myexpos/aliases.sh ]]; then
-  source $HOME/myexpos/aliases.sh
+if [[ -f $HOME/myexpos/tools/aliases.sh ]]; then
+  source $HOME/myexpos/tools/aliases.sh
 fi
 
 # For smart history search
