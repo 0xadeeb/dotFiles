@@ -476,7 +476,7 @@ myEventHook =
   ]
 
 myLogHook :: X ()
-myLogHook = fadeInactiveLogHook fadeAmount
+myLogHook = refocusLastLogHook <> fadeInactiveLogHook fadeAmount
             where fadeAmount = 0.9
 
 blue, lowWhite, magenta, red, white, yellow :: String

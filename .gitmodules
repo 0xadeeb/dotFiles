@@ -10,3 +10,6 @@
 [submodule "dotfiles/.config/xmonad/xmonad-dbus-Git"]
 	path = dotfiles/.config/xmonad/xmonad-dbus-Git
 	url = https://github.com/troydm/xmonad-dbus.git
+[submodule "dotfiles/.config/doom/themes"]
+	path = dotfiles/.config/doom/themes
+	url = https://github.com/lladeebll/emacsThemes.git
