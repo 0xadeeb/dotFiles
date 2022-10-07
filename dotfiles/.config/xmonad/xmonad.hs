@@ -25,6 +25,7 @@ import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.StatusBar
 import XMonad.Hooks.StatusBar.PP
 import XMonad.Hooks.WindowSwallowing
+import XMonad.Hooks.RefocusLast -- (refocusLastLayoutHook, refocusLastWhen, isFloat)
 
 -- Utils
 import XMonad.Util.SpawnOnce
@@ -43,6 +44,7 @@ import XMonad.Layout.Spiral
 import XMonad.Layout.SubLayouts
 import XMonad.Layout.Tabbed
 import XMonad.Layout.ThreeColumns
+import XMonad.Layout.TrackFloating
 
 -- Layout modifiers
 import XMonad.Layout.Decoration
@@ -321,7 +323,8 @@ smartBarDeco direction theme =
   decoration shrinkText theme $ SmartBarDeco direction
 
 myLayout
-  = tiled
+  = refocusLastLayoutHook . trackFloating
+    $ tiled
         ||| grid
         ||| threeCol
         ||| floats
@@ -433,7 +436,7 @@ manageWorkspace p h1 h2 = do
 
 myManageHook =
     manageSpawn
-    <+> manageWorkspace ( `elem` ["Code"] ) ( insertPosition End Newer ) ( insertPosition Master Newer )
+    <+> insertPosition Master Newer
       where
         manageSpawn = composeOne
           [ className =? "mpv"            -?> doFloat
@@ -446,7 +449,6 @@ myManageHook =
           , isRole =? gtkFile  -?> forceCenterFloat
           , isInProperty "_NET_WM_WINDOW_TYPE"
                          "_NET_WM_WINDOW_TYPE_SPLASH" -?> doCenterFloat
-          , title =? "WhatsApp - Brave" -?>  doShift $ myWorkspaces !! 3
           , className =? myBrowserClass  -?> doShift $ myWorkspaces !! 0
           , className =? "Emacs"          -?> doShift $ myWorkspaces !! 2
           ]
@@ -466,8 +468,12 @@ forceCenterFloat = doFloatDep move
     x = (1-w)/2
     y = (1-h)/2
 
-myEventHook = swallowEventHook (className =? "kitty"
-                                 <||> className =? "Termite") (return True)
+myEventHook =
+  mconcat
+  [
+   refocusLastWhen (refocusingIsActive <||> isFloat),
+   swallowEventHook (className =? "kitty" <||> className =? "Termite") (className /=? "Zenity")
+  ]
 
 myLogHook :: X ()
 myLogHook = fadeInactiveLogHook fadeAmount
@@ -503,7 +509,6 @@ myStartupHook = do
   -- spawn $ "wal -i " ++ myWallpapers -- pywal sets random wallpaper
   spawn $ "feh --randomize --bg-scale " ++ myWallpapers ++ "/*"  -- set wallpaper
   spawnOnce "xsetroot -cursor_name left_ptr"
-  -- spawnOnce "xscreensaver -no-splash &"
   spawnOnce "nm-applet --sm-disable &"
   spawnOnce "blueman-applet &"
   spawnOnce "flameshot &"
@@ -512,9 +517,10 @@ myStartupHook = do
   spawnOnce "libinput-gestures-setup start"
   spawnOnce "xfce4-power-manager &"
   spawnOnce "picom &"
+  spawnOnce "parcellite &"
   spawnOnce "alttab -fg \"#d58681\" -bg \"#4a4a4a\" -frame \"#eb564d\" -t 128x150 -i 127x64 -w 1 &"
   spawnOnce "~/.config/polybar/launch.sh --forest"
-  -- spawnOnce "~/.config/conky/conky-startup.sh"
+  spawnOnce "~/.config/conky/conky-startup.sh"
   spawnOnce "~/.local/bin/startEmacs.sh"
 
 main = do
@@ -527,9 +533,10 @@ main = do
     $ ewmhFullscreen
     $ ewmh
     -- $ withEasySB (statusBarProp ("xmobar " ++ myBar) (pure myXmobarPP)) defToggleStrutsKey
-    $ docks defaults {logHook = dynamicLogWithPP (myLogHookPP dbus) <+> myLogHook}
+    $ docks
+    $ defaults dbus
 
-defaults = def {
+defaults dbus = def {
       -- simple stuff
         terminal           = myTerminal,
         focusFollowsMouse  = myFocusFollowsMouse,
@@ -549,6 +556,6 @@ defaults = def {
         layoutHook         = showWName' myShowWNameTheme $ myLayout,
         manageHook         = myManageHook,
         handleEventHook    = myEventHook,
-        -- logHook            = myLogHook,
+        logHook            = dynamicLogWithPP (myLogHookPP dbus) <+> myLogHook,
         startupHook        = myStartupHook
     } `additionalKeysP` myKeys

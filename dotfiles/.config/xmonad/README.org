@@ -63,6 +63,7 @@ import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.StatusBar
 import XMonad.Hooks.StatusBar.PP
 import XMonad.Hooks.WindowSwallowing
+import XMonad.Hooks.RefocusLast -- (refocusLastLayoutHook, refocusLastWhen, isFloat)
 
 -- Utils
 import XMonad.Util.SpawnOnce
@@ -81,6 +82,7 @@ import XMonad.Layout.Spiral
 import XMonad.Layout.SubLayouts
 import XMonad.Layout.Tabbed
 import XMonad.Layout.ThreeColumns
+import XMonad.Layout.TrackFloating
 
 -- Layout modifiers
 import XMonad.Layout.Decoration
@@ -432,7 +434,8 @@ smartBarDeco direction theme =
 ** The layout function to be called in main
 #+begin_src haskell
 myLayout
-  = tiled
+  = refocusLastLayoutHook . trackFloating
+    $ tiled
         ||| grid
         ||| threeCol
         ||| floats
@@ -539,6 +542,8 @@ To find the property name associated with a program, use ~xprop | grep WM_CLASS~
 
 To match on the WM_NAME, you can use 'title' in the same way that 'className' and 'resource' are used below.
 
+Window rules for different work spaces
+Eg use ~manageWorkspace ( `elem` ["Code"] ) ( insertPosition End Newer ) ( insertPosition Master Newer )~
 #+begin_src haskell
 manageWorkspace
   :: (WorkspaceId -> Bool)
@@ -555,7 +560,7 @@ manageWorkspace p h1 h2 = do
 #+begin_src haskell
 myManageHook =
     manageSpawn
-    <+> manageWorkspace ( `elem` ["Code"] ) ( insertPosition End Newer ) ( insertPosition Master Newer )
+    <+> insertPosition Master Newer
       where
         manageSpawn = composeOne
           [ className =? "mpv"            -?> doFloat
@@ -568,7 +573,6 @@ myManageHook =
           , isRole =? gtkFile  -?> forceCenterFloat
           , isInProperty "_NET_WM_WINDOW_TYPE"
                          "_NET_WM_WINDOW_TYPE_SPLASH" -?> doCenterFloat
-          , title =? "WhatsApp - Brave" -?>  doShift $ myWorkspaces !! 3
           , className =? myBrowserClass  -?> doShift $ myWorkspaces !! 0
           , className =? "Emacs"          -?> doShift $ myWorkspaces !! 2
           ]
@@ -599,14 +603,18 @@ forceCenterFloat = doFloatDep move
 Defines a custom handler function for X Events. The function should return (All True) if the default handler is to be run afterwards. To combine event hooks use ~mappend~ or ~mconcat~ from Data.Monoid.
 
 #+begin_src haskell
-myEventHook = swallowEventHook (className =? "kitty"
-                                 <||> className =? "Termite") (return True)
+myEventHook =
+  mconcat
+  [
+   refocusLastWhen (refocusingIsActive <||> isFloat),
+   swallowEventHook (className =? "kitty" <||> className =? "Termite") (className /=? "Zenity")
+  ]
 #+end_src
 
 * Log Hook
 #+begin_src haskell
 myLogHook :: X ()
-myLogHook = fadeInactiveLogHook fadeAmount
+myLogHook = refocusLastLogHook <> fadeInactiveLogHook fadeAmount
             where fadeAmount = 0.9
 #+end_src
 
@@ -651,7 +659,6 @@ myStartupHook = do
   -- spawn $ "wal -i " ++ myWallpapers -- pywal sets random wallpaper
   spawn $ "feh --randomize --bg-scale " ++ myWallpapers ++ "/*"  -- set wallpaper
   spawnOnce "xsetroot -cursor_name left_ptr"
-  -- spawnOnce "xscreensaver -no-splash &"
   spawnOnce "nm-applet --sm-disable &"
   spawnOnce "blueman-applet &"
   spawnOnce "flameshot &"
@@ -660,9 +667,10 @@ myStartupHook = do
   spawnOnce "libinput-gestures-setup start"
   spawnOnce "xfce4-power-manager &"
   spawnOnce "picom &"
+  spawnOnce "parcellite &"
   spawnOnce "alttab -fg \"#d58681\" -bg \"#4a4a4a\" -frame \"#eb564d\" -t 128x150 -i 127x64 -w 1 &"
   spawnOnce "~/.config/polybar/launch.sh --forest"
-  -- spawnOnce "~/.config/conky/conky-startup.sh"
+  spawnOnce "~/.config/conky/conky-startup.sh"
   spawnOnce "~/.local/bin/startEmacs.sh"
 #+end_src
 
@@ -716,13 +724,14 @@ main = do
     $ ewmhFullscreen
     $ ewmh
     -- $ withEasySB (statusBarProp ("xmobar " ++ myBar) (pure myXmobarPP)) defToggleStrutsKey
-    $ docks defaults {logHook = dynamicLogWithPP (myLogHookPP dbus) <+> myLogHook}
+    $ docks
+    $ defaults dbus
 #+end_src
 
 ** A structure containing configuration settings overriding fields in the default config
 Any field you don't override, will use the defaults defined in xmonad/XMonad/Config.hs
 #+begin_src haskell
-defaults = def {
+defaults dbus = def {
       -- simple stuff
         terminal           = myTerminal,
         focusFollowsMouse  = myFocusFollowsMouse,
@@ -742,7 +751,7 @@ defaults = def {
         layoutHook         = showWName' myShowWNameTheme $ myLayout,
         manageHook         = myManageHook,
         handleEventHook    = myEventHook,
-        -- logHook            = myLogHook,
+        logHook            = dynamicLogWithPP (myLogHookPP dbus) <+> myLogHook,
         startupHook        = myStartupHook
     } `additionalKeysP` myKeys
 #+end_src
