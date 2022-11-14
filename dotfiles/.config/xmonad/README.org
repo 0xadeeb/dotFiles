@@ -13,6 +13,7 @@
   - [[#set-up-workspaces][Set up workspaces]]
   - [[#custom-variables][Custom variables]]
 - [[#key-bindings][Key bindings]]
+  - [[#named-actions][Named actions]]
   - [[#basic-keybindings][Basic keybindings]]
   - [[#keybinding-to-switch-workspaces][Keybinding to switch workspaces]]
   - [[#keybinding-to-switch-physical-screens][Keybinding to switch physical screens]]
@@ -41,12 +42,14 @@ These are Haskell modules that we must import so that we can use their functions
 
 -- Basic imports
 import XMonad
+import System.IO (hClose, hPutStr, hPutStrLn)
 import System.Exit
 
 -- Actions
 import XMonad.Actions.FloatSnap
 
 -- Data Structures
+import Data.Char (isSpace, toUpper)
 import Data.Monoid
 import qualified Data.Map as M
 
@@ -69,7 +72,8 @@ import XMonad.Hooks.RefocusLast -- (refocusLastLayoutHook, refocusLastWhen, isFl
 import XMonad.Util.SpawnOnce
 import XMonad.Util.Run
 import XMonad.Util.Loggers
-import XMonad.Util.EZConfig (additionalKeysP)
+import XMonad.Util.EZConfig (additionalKeysP, mkNamedKeymap)
+import XMonad.Util.NamedActions
 import XMonad.Util.Types ( Direction2D(U, D, L, R) )
 
 -- Layouts
@@ -201,145 +205,167 @@ topBarTheme = def
 
 * Key bindings
 Add, modify or remove key bindings here.
-** Basic keybindings
+** Named actions
+
 #+begin_src haskell
-myKeys :: [(String , X ())]
-myKeys =
+subtitle' ::  String -> ((KeyMask, KeySym), NamedAction)
+subtitle' x = ((0,0), NamedAction $ map toUpper
+                      $ sep ++ "\n-- " ++ x ++ " --\n" ++ sep)
+  where
+    sep = replicate (6 + length x) '-'
+
+showKeybindings :: [((KeyMask, KeySym), NamedAction)] -> NamedAction
+showKeybindings x = addName "Show Keybindings" $ io $ do
+  h <- spawnPipe $ "yad --text-info --fontname=\"SauceCodePro Nerd Font Mono 12\" --fore=#e6f2ff back=#282c36 --center --geometry=1200x800 --title \"XMonad keybindings\""
+  --hPutStr h (unlines $ showKm x) -- showKM adds ">>" before subtitles
+  hPutStr h (unlines $ showKmSimple x) -- showKmSimple doesn't add ">>" to subtitles
+  hClose h
+  return ()
+#+end_src
+
+** Basic keybindings
+Use ~Mod-Shift-/~ or ~Mod-?~ to view the list of all keybindings
+#+begin_src haskell
+myKeys :: XConfig l0 -> [((KeyMask, KeySym), NamedAction)]
+myKeys c =
+    let subKeys str ks = subtitle' str : mkNamedKeymap c ks in
+    subKeys "Custom keybindings"
     -- launch a terminal
-    [ ("M-S-<Return>", spawn myTerminal)
+    [ ("M-S-<Return>", addName "Spawns default terminal" $ spawn myTerminal)
 
-    -- launch dmenu
-    , ("M-p", spawn "rofi -show drun")
-    , ("M-o", spawn "rofi -show filebrowser")
-
-    -- launch gmrun
-    , ("M-S-p", spawn "gmrun")
+    -- launchers
+    , ("M-p", addName "Quick Launcher" $ spawn "rofi -show drun")
+    , ("M-o", addName "Files Launcher" $ spawn "rofi -show filebrowser")
 
     -- close focused window
-    , ("M-S-c", kill)
+    , ("M-S-c", addName "Close focused window" $ kill)
 
      -- Rotate through the available layout algorithms
-    , ("M-<Space>", sendMessage NextLayout)
+    , ("M-<Space>", addName "Rotate through the layouts" $ sendMessage NextLayout)
 
     --  Reset the layouts on the current workspace to default
     -- , ("M-S-<Space>", setLayout $ XMonad.layoutHook XConfig)
 
     -- Jump to layouts
-    , ("M-f" , sendMessage $ JumpToLayout "Tabbed"     ) --Switch to the full tabbed layout
-    , ("M-g" , sendMessage $ JumpToLayout "Grid"     ) --Switch to the grid layout
+    , ("M-t" , addName "Switch to tilling layout" $ sendMessage $ JumpToLayout "Tiled"     ) --Switch to the tiling layout
+    , ("M-f" , addName "Switch to tabbed layout" $ sendMessage $ JumpToLayout "Tabbed"     ) --Switch to the full tabbed layout
+    , ("M-g" ,  addName "Switch to grid layout" $ sendMessage $ JumpToLayout "Grid"     ) --Switch to the grid layout
 
     -- Resize viewed windows to the correct size
-    , ("M-n", refresh)
+    , ("M-n", addName "Resize the window" $ refresh)
 
     -- Move focus to the next window
-    , ("M-<Tab>", windows W.focusDown)
+    , ("M-<Tab>", addName "Move focus to next window" $ windows W.focusDown)
 
     -- Merging windows to subLayout groups
-    , ("M-C-h", sendMessage $ pullGroup L)
-    , ("M-C-l", sendMessage $ pullGroup R)
-    , ("M-C-k", sendMessage $ pullGroup U)
-    , ("M-C-j", sendMessage $ pullGroup D)
+    , ("M-C-h", addName "Merge window with window in the left" $ sendMessage $ pullGroup L)
+    , ("M-C-l", addName "Merge window with window in the right" $ sendMessage $ pullGroup R)
+    , ("M-C-k", addName "Merge window with window above" $ sendMessage $ pullGroup U)
+    , ("M-C-j", addName "Merge window with window below" $ sendMessage $ pullGroup D)
 
-    , ("M-C-m", withFocused (sendMessage . MergeAll))
-    , ("M-C-u", withFocused (sendMessage . UnMerge))
+    , ("M-C-m", addName "Merge all the windows open in workspace" $ withFocused (sendMessage . MergeAll))
+    , ("M-C-u", addName "UnMerge focused window from the group" $ withFocused (sendMessage . UnMerge))
 
-    , ("M-C-.", onGroup W.focusUp')
-    , ("M-C-,", onGroup W.focusDown')
+    , ("M-C-.", addName "Switch focus to next window in group" $ onGroup W.focusUp')
+    , ("M-C-,", addName "Switch focus to previous window in group" $ onGroup W.focusDown')
 
     -- Move focus to the next window
-    , ("M-j", windows W.focusDown)
+    , ("M-j", addName "Move focus to the next window" $ windows W.focusDown)
 
     -- Move focus to the previous window
-    , ("M-k", windows W.focusUp  )
+    , ("M-k", addName "Move focus to previous window" $ windows W.focusUp  )
 
     -- Move focus to the master window
-    -- , ("M-m", windows W.focusMaster  )
+    -- , ("M-m", addName "Move focus to the master window" $ windows W.focusMaster  )
 
     -- Swap the focused window and the master window
-    , ("M-<Return>", windows W.swapMaster)
+    , ("M-<Return>", addName "Swap focused and master window" $ windows W.swapMaster)
 
     -- Swap the focused window with the next window
-    , ("M-S-j", windows W.swapDown  )
+    , ("M-S-j", addName "Swap the focused window with the next window" $ windows W.swapDown  )
 
     -- Swap the focused window with the previous window
-    , ("M-S-k", windows W.swapUp    )
+    , ("M-S-k", addName "Swap the focused window with the previous window" $ windows W.swapUp    )
 
     -- Shrink the master area
-    , ("M-h", sendMessage Shrink)
+    , ("M-h", addName "Shrink the master area" $ sendMessage Shrink)
 
     -- Expand the master area
-    , ("M-l", sendMessage Expand)
+    , ("M-l", addName "Expand the master area" $ sendMessage Expand)
 
     -- Push window back into tiling
-    , ("M-t", withFocused $ windows . W.sink)
+    , ("M-S-t", addName "Push window back into tiling" $ withFocused $ windows . W.sink)
 
-    -- Increment the number of windows in the master area
-    , ("M-,", sendMessage (IncMasterN 1))
+    -- Increase the number of windows in the master area
+    , ("M-,", addName "Increase the number of windows in the master area" $ sendMessage (IncMasterN 1))
 
-    -- Deincrement the number of windows in the master area
-    , ("M-.", sendMessage (IncMasterN (-1)))
+    -- Decrease the number of windows in the master area
+    , ("M-.", addName "Decrease the number of windows in the master area" $ sendMessage (IncMasterN (-1)))
 
     -- Toggle the status bar gap
     -- Use this binding with avoidStruts from Hooks.ManageDocks.
     -- See also the statusBar function from Hooks.DynamicLog.
-    , ("M-S-b", sendMessage ToggleStruts)
+    , ("M-S-b", addName "Toggle the status bar gap" $ sendMessage ToggleStruts)
 
     -- set wallpaper
-    , ("M-b", spawn $ "feh --randomize --bg-scale " ++ myWallpapers ++ "/*")
+    , ("M-b", addName "Change wallpaper" $ spawn $ "feh --randomize --bg-scale " ++ myWallpapers ++ "/*")
 
     -- Quit xmonad
-    , ("M-S-q", io (exitWith ExitSuccess))
+    , ("M-S-q", addName "Quit xmonad" $ io (exitWith ExitSuccess))
 
     -- Restart xmonad
-    , ("M-q", spawn "xmonad --recompile && ( xmonad --restart )")
+    , ("M-q", addName "Restart xmonad" $ spawn "xmonad --recompile && ( xmonad --restart )")
 
     -- Open emacs
-    , ("M-e e", spawn $ myEmacs ++ "-e '(dashboard-refresh-buffer)'")
+    , ("M-e e", addName "Open emacs" $ spawn $ myEmacs ++ "-e '(dashboard-refresh-buffer)'")
 
     -- Restart emacs server
-    , ("M-e r", spawn  "~/.local/bin/startEmacs.sh")
+    , ("M-e r", addName "Restart emacs server" $ spawn  "~/.local/bin/startEmacs.sh")
 
     -- Lock screen
-    , ("M-S-l", spawn  "betterlockscreen -l")
+    , ("M-S-l", addName "Lock screen" $ spawn  "betterlockscreen -l")
 
     -- Power menu
-    , ("M-x", spawn  "oblogout")
-
-    -- Increase Brightness
-    , ("<XF86MonBrightnessUp>", spawn "~/.config/dunst/brightness/brightnessControl.sh up")
-
-    -- Decrease Brightness
-    , ("<XF86MonBrightnessDown>", spawn "~/.config/dunst/brightness/brightnessControl.sh down")
-
-    -- Increase volume
-    , ("<XF86AudioRaiseVolume>", spawn "~/.config/dunst/volume/volume.sh up")
-
-    -- Decrease volume
-    , ("<XF86AudioLowerVolume>", spawn "~/.config/dunst/volume/volume.sh down")
-
-    -- Mute and unmute
-    , ("<XF86AudioMute>", spawn "~/.config/dunst/volume/volume.sh toggle")
-
-    -- Screenshot
-    , ("<Print>", spawn "flameshot full")
+    , ("M-x", addName "Spawn power menu" $ spawn "oblogout")
 
     -- No borders
     --, ("M-S-n" SendMessage )
 
     -- Move to miscl workspace
-    , ("M-m", windows $ W.greedyView $ last myWorkspaces)
-    , ("M-S-m", windows $ W.shift $ last myWorkspaces)
+    , ("M-m", addName "Switch to last workspace" $ windows $ W.greedyView $ last myWorkspaces)
+    , ("M-S-m", addName "Move focused window to last workspace" $ windows $ W.shift $ last myWorkspaces)
 
+    ]
+
+    ^++^ subKeys "Mutimedia keys"
+    [
+    -- Increase Brightness
+    ("<XF86MonBrightnessUp>", addName "Increase Brightness" $ spawn "~/.config/dunst/brightness/brightnessControl.sh up")
+
+    -- Decrease Brightness
+    , ("<XF86MonBrightnessDown>", addName "Decrease Brightness" $ spawn "~/.config/dunst/brightness/brightnessControl.sh down")
+
+    -- Increase volume
+    , ("<XF86AudioRaiseVolume>", addName "Increase volume" $ spawn "~/.config/dunst/volume/volume.sh up")
+
+    -- Decrease volume
+    , ("<XF86AudioLowerVolume>", addName "Decrease volume" $ spawn "~/.config/dunst/volume/volume.sh down")
+
+    -- Mute and unmute
+    , ("<XF86AudioMute>", addName "Mute and unmute" $ spawn "~/.config/dunst/volume/volume.sh toggle")
+
+    -- Screenshot
+    , ("<Print>",  addName "Take screenshot" $spawn "~/.local/bin/screenShot.sh")
     ]
 #+end_src
 
 ** Keybinding to switch workspaces
 mod-[1..9], Switch to workspace N and mod-shift-[1..9], Move client to workspace N
 #+begin_src haskell
-    ++
-    [("M-" ++ m ++ (show i), windows $ f $ myWorkspaces !! (i - 1))
+    ^++^ subKeys "Workspace related keys"
+    [("M-" ++ e ++ (show i), addName (m ++ (show i)) $ windows $ f $ myWorkspaces !! (i - 1))
         | i <- [1..9]
-        , (f, m) <- [(W.greedyView, ""), (W.shift, "S-")]]
+        , (f, e, m) <- [(W.greedyView, "", "Switch to workspace "), (W.shift, "S-", "Move focused window to workspace ")]]
 #+end_src
 
 ** Keybinding to switch physical screens
@@ -565,6 +591,8 @@ myManageHook =
         manageSpawn = composeOne
           [ className =? "mpv"            -?> doFloat
           , className =? "Oblogout"       -?> doFloat
+          , className =? "Yad"       -?> doFloat
+          , className =? "QjackCtl"       -?> doCenterFloat
           , isRole =? "pop-up" -?> doCenterFloat
           , isDialog                      -?> doCenterFloat
           , resource  =? "desktop_window" -?> doIgnore
@@ -721,6 +749,7 @@ main = do
   D.requestAccess dbus
 
   xmonad
+    $ addDescrKeys' ((mod4Mask .|. shiftMask, xK_slash), showKeybindings) myKeys
     $ ewmhFullscreen
     $ ewmh
     -- $ withEasySB (statusBarProp ("xmobar " ++ myBar) (pure myXmobarPP)) defToggleStrutsKey
@@ -753,5 +782,5 @@ defaults dbus = def {
         handleEventHook    = myEventHook,
         logHook            = dynamicLogWithPP (myLogHookPP dbus) <+> myLogHook,
         startupHook        = myStartupHook
-    } `additionalKeysP` myKeys
+    }
 #+end_src

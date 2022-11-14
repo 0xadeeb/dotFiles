@@ -276,10 +276,6 @@
     )
    )
 
-(add-to-list 'auto-mode-alist '("\\.xsm\\'" . asm-mode))
-(add-to-list 'auto-mode-alist '("\\.expl\\'" . prog-mode))
-(add-to-list 'auto-mode-alist '("\\.spl\\'" . prog-mode))
-
 (use-package autoinsert
   :config
   (setq auto-insert-query nil)             ; disable the default auto-inserts

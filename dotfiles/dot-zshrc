@@ -211,6 +211,7 @@ function up () {
   fi
 }
 # OS Lab
+fignore=(xsm)
 if [[ -f $HOME/myexpos/tools/aliases.sh ]]; then
   source $HOME/myexpos/tools/aliases.sh
 fi

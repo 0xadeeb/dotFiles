@@ -27,7 +27,6 @@
 - [[#devepolment][Devepolment]]
   - [[#company-mode][Company mode]]
   - [[#languages][Languages]]
-  - [[#oslab][OsLab]]
   - [[#competitive-coding][Competitive coding]]
 - [[#shells][Shells]]
   - [[#v-term][V-term]]
@@ -472,13 +471,6 @@ Configuring lsp-mode after loading, refer [[https://emacs-lsp.github.io/lsp-mode
     )
    )
 
-#+end_src
-
-** OsLab
-#+begin_src elisp
-(add-to-list 'auto-mode-alist '("\\.xsm\\'" . asm-mode))
-(add-to-list 'auto-mode-alist '("\\.expl\\'" . prog-mode))
-(add-to-list 'auto-mode-alist '("\\.spl\\'" . prog-mode))
 #+end_src
 
 ** Competitive coding
