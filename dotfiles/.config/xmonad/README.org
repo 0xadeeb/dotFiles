@@ -243,9 +243,6 @@ myKeys c =
      -- Rotate through the available layout algorithms
     , ("M-<Space>", addName "Rotate through the layouts" $ sendMessage NextLayout)
 
-    --  Reset the layouts on the current workspace to default
-    -- , ("M-S-<Space>", setLayout $ XMonad.layoutHook XConfig)
-
     -- Jump to layouts
     , ("M-t" , addName "Switch to tilling layout" $ sendMessage $ JumpToLayout "Tiled"     ) --Switch to the tiling layout
     , ("M-f" , addName "Switch to tabbed layout" $ sendMessage $ JumpToLayout "Tabbed"     ) --Switch to the full tabbed layout
@@ -256,6 +253,8 @@ myKeys c =
 
     -- Move focus to the next window
     , ("M-<Tab>", addName "Move focus to next window" $ windows W.focusDown)
+    -- Move focus to the previous window
+    , ("M-S-<Tab>", addName "Move focus to previous window" $ windows W.focusUp)
 
     -- Merging windows to subLayout groups
     , ("M-C-h", addName "Merge window with window in the left" $ sendMessage $ pullGroup L)
@@ -635,7 +634,7 @@ myEventHook =
   mconcat
   [
    refocusLastWhen (refocusingIsActive <||> isFloat),
-   swallowEventHook (className =? "kitty" <||> className =? "Termite") (className /=? "Zenity")
+   swallowEventHook (className =? "kitty" <||> className =? "Termite") (className /=? "Zenity" <&&> className /=? "Yad")
   ]
 #+end_src
 

@@ -9,7 +9,6 @@ earbuds
 gtypist-single-space
 libinput-gestures-git
 nerd-fonts-mononoki
-nerd-fonts-source-code-pro
 nerd-fonts-victor-mono
 oblogout-py3-git
 pacman-hook-list-installed-packages
@@ -22,4 +21,6 @@ snapper-gui-git
 snapper-rollback
 ttf-icomoon-feather
 ttf-malayalam-fonts-meta
+ttf-times-new-roman
 ttf-twemoji
+virtualbox-ext-oracle
